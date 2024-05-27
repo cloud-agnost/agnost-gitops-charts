@@ -1,0 +1,63 @@
+apiVersion: v1
+entries:
+  cert-manager:
+  - annotations:
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: "false"
+      artifacthub.io/signKey: |
+        fingerprint: 1020CF3C033D4F35BAE1C19E1226061C665DF13E
+        url: https://cert-manager.io/public-keys/cert-manager-keyring-2021-09-20-1020CF3C033D4F35BAE1C19E1226061C665DF13E.gpg
+    apiVersion: v1
+    appVersion: v1.14.5
+    created: "2024-05-27T23:37:58.527416+03:00"
+    description: A Helm chart for cert-manager
+    digest: 865bd97a0c1f13d52099f25b74f3c560972206bf52603818b00bc6c5c4278d5a
+    home: https://github.com/cert-manager/cert-manager
+    icon: https://raw.githubusercontent.com/cert-manager/cert-manager/d53c0b9270f8cd90d908460d69502694e1838f5f/logo/logo-small.png
+    keywords:
+    - cert-manager
+    - kube-lego
+    - letsencrypt
+    - tls
+    kubeVersion: '>= 1.22.0-0'
+    maintainers:
+    - email: cert-manager-maintainers@googlegroups.com
+      name: cert-manager-maintainers
+      url: https://cert-manager.io
+    name: cert-manager
+    sources:
+    - https://github.com/cert-manager/cert-manager
+    urls:
+    - https://github.com/cloud-agnost/agnost-gitops-charts.git/charts/cert-manager-v1.14.5.tgz
+    version: v1.14.5
+  ingress-nginx:
+  - annotations:
+      artifacthub.io/changes: |-
+        - "update post submit helm ci and clean up (#11221)"
+        - "refactor helm ci tests part I (#11188)"
+        - "Update Ingress-Nginx version controller-v1.10.1"
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: 1.10.1
+    created: "2024-05-27T23:37:58.531445+03:00"
+    description: Ingress controller for Kubernetes using NGINX as a reverse proxy
+      and load balancer
+    digest: b3e4b14509f56080e09b022cde05dd02822fb054616ea212d93981b461732913
+    home: https://github.com/kubernetes/ingress-nginx
+    icon: https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Nginx_logo.svg/500px-Nginx_logo.svg.png
+    keywords:
+    - ingress
+    - nginx
+    kubeVersion: '>=1.21.0-0'
+    maintainers:
+    - name: Gacko
+    - name: rikatz
+    - name: strongjz
+    - name: tao12345666333
+    name: ingress-nginx
+    sources:
+    - https://github.com/kubernetes/ingress-nginx
+    urls:
+    - https://github.com/cloud-agnost/agnost-gitops-charts.git/charts/ingress-nginx-4.10.1.tgz
+    version: 4.10.1
+generated: "2024-05-27T23:37:58.523725+03:00"

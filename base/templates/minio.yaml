@@ -1,0 +1,125 @@
+{{ $secret := (lookup "v1" "Secret" .Values.base.namespaceOverride "minio") }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio
+  namespace: {{ .Values.base.namespaceOverride }}
+type: Opaque
+stringData:
+  {{ if $secret }}
+  accessKey: {{ $secret.data.accessKey | b64dec }}
+  secretKey: {{ $secret.data.secretKey | b64dec }}
+  {{ else }}
+  accessKey: {{ derivePassword 1 "long" .Release.Name .Chart.Name uuidv4 | b64enc | trimSuffix "=" | quote }}
+  secretKey: {{ derivePassword 1 "long" .Release.Name .Chart.Name uuidv4 | b64enc | trimSuffix "=" | quote }}
+  {{ end }}
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+  namespace: {{ .Values.base.namespaceOverride }}
+spec:
+  serviceName: minio
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      partition: 0
+  revisionHistoryLimit: 10
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+      - name: minio
+        image: quay.io/minio/minio:RELEASE.2024-05-10T01-41-38Z
+        command:
+        - /bin/sh
+        - -ce
+        - |
+          /usr/bin/docker-entrypoint.sh minio server /data -S /etc/minio/certs/ --address :9000 --console-address :9001 &
+          until (mc alias set myminio http://localhost:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD)
+          do
+            echo "Waiting for MinIO to be ready..."
+            sleep 3
+          done
+          # If the bucket does not exist, create it
+          if ! mc ls myminio/zot-storage; then mc mb myminio/zot-storage; fi
+          wait
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9000
+          name: http
+          protocol: TCP
+        - containerPort: 9001
+          name: http-console
+          protocol: TCP
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 100m
+          limits:
+            memory: 1Gi
+            cpu: 1
+        env:
+        - name: MINIO_ROOT_USER
+          valueFrom:
+            secretKeyRef:
+              key: accessKey
+              name: minio
+        - name: MINIO_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: secretKey
+              name: minio
+        livenessProbe:
+          httpGet:
+            path: /minio/health/live
+            port: 9000
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 6
+        readinessProbe:
+          httpGet:
+            path: /minio/health/ready
+            port: 9000
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 6
+        volumeMounts:
+        - name: data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: {{ .Values.base.namespaceOverride }}
+spec:
+  ports:
+  - port: 27017
+    name: minio
+  clusterIP: None
+  selector:
+    app: minio

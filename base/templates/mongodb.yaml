@@ -1,0 +1,220 @@
+{{ $secret := (lookup "v1" "Secret" .Values.base.namespaceOverride "mongodb") }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb
+  namespace: {{ .Values.base.namespaceOverride }}
+type: Opaque
+stringData:
+  username: "mongo-admin"
+  {{ if $secret }}
+  password: {{ $secret.data.password | b64dec }}
+  keyfile: {{ $secret.data.keyfile | b64dec }}
+  {{ else }}
+  password: {{ derivePassword 1 "long" .Release.Name .Chart.Name uuidv4 | b64enc | trimSuffix "=" | quote }}
+  keyfile: {{ include "randAlphaNumBase64Safe" 756 | b64enc | trimSuffix "=" | quote }}
+  {{ end }}
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb
+  namespace: {{ .Values.base.namespaceOverride }}
+data:
+  mongod.conf: |
+    storage:
+      dbPath: /data/db
+    net:
+      bindIp: 0.0.0.0
+    replication:
+      replSetName: rs0
+    systemLog:
+      destination: file
+      path: /var/log/mongod.log
+      logAppend: true
+    security:
+      authorization: enabled
+      keyFile: /etc/mongodb-keyfile/keyfile.txt
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-init
+  namespace: {{ .Values.base.namespaceOverride }}
+data:
+  mongod.conf: |
+    storage:
+      dbPath: /data/db
+    net:
+      bindIp: 0.0.0.0
+    replication:
+      replSetName: rs0
+    systemLog:
+      destination: file
+      path: /var/log/mongod.log
+      logAppend: true
+      
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+  namespace: {{ .Values.base.namespaceOverride }}
+spec:
+  serviceName: mongodb
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      partition: 0
+  revisionHistoryLimit: 10
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: docker.io/mongo:7.0.7
+        command:
+        - mongod
+        - "--config"
+        - "/config/mongod.conf"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 27017
+          name: mongod
+        resources:
+          requests:
+            memory: 512Mi
+            cpu: 100m
+          limits:
+            memory: 1Gi
+            cpu: 1
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongodb
+              key: username
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb
+              key: password
+        livenessProbe:
+          tcpSocket:
+            port: 27017
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 6
+        readinessProbe:
+          tcpSocket:
+            port: 27017
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 6
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: data
+          mountPath: /data/db
+        - name: logs
+          mountPath: /var/log/mongodb
+        - name: keyfile
+          mountPath: /etc/secrets
+          readOnly: true
+        - name: keyfile-copy
+          mountPath: /etc/mongodb-keyfile
+      initContainers:
+      - name: init
+        image: docker.io/mongo:7.0.7
+        command:
+        - bash
+        - -c
+        - >
+          cp /etc/secrets/keyfile.txt /etc/mongodb-keyfile/keyfile.txt &&
+          chmod 600 /etc/mongodb-keyfile/keyfile.txt &&
+          mongod --config /config/mongod.conf --fork --logpath /var/log/mongod.log --dbpath /data/db &&
+          mongosh --eval "rs.initiate({_id: 'rs0', members: [{ _id: 0, host: 'mongodb-0.mongodb.{{ .Values.base.namespaceOverride }}.svc.cluster.local:27017' }]})" &&
+          mongosh --eval "db.getSiblingDB('admin').createUser({user: '${MONGO_INITDB_ROOT_USERNAME}', pwd: '${MONGO_INITDB_ROOT_PASSWORD}', roles: [{role: 'root', db: 'admin'}]})" &&
+          mongod --shutdown
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongodb
+              key: username
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb
+              key: password
+        volumeMounts:
+        - name: config-init
+          mountPath: /config
+        - name: data
+          mountPath: /data/db
+        - name: logs
+          mountPath: /var/log
+        - name: keyfile
+          mountPath: /etc/secrets
+        - name: keyfile-copy
+          mountPath: /etc/mongodb-keyfile
+      volumes:
+      - name: config
+        configMap:
+          name: mongodb
+      - name: config-init
+        configMap:
+          name: mongodb-init
+      - name: keyfile
+        secret:
+          secretName: mongodb
+          items:
+          - key: keyfile
+            path: keyfile.txt
+      - name: keyfile-copy
+        emptyDir: {}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+  - metadata:
+      name: logs
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 512Mi
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: {{ .Values.base.namespaceOverride }}
+spec:
+  ports:
+  - port: 27017
+    name: mongodb
+  clusterIP: None
+  selector:
+    app: mongodb
