@@ -1,3 +1,1 @@
-# Agnost GitOps installation via Helm Chart
-
-Work in progres!
+## What is Agnost GitOps?

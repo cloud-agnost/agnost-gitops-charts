@@ -1,9 +1,0 @@
-
-👍  Agnost GitOps installation has started! 
-⏳  It might take 5-10 minutes to complete the required deployments. Please check your installation status by running:
-  
-    kubectl get pods -n {{ .Values.base.namespaceOverride }}
-
-📣  As a next step, you need to complete your setup by creating your user account through Agnost Studio. 
-📣  To launch Agnost Studio, type the URL or IP address of your cluster on your browser (e.g., http(s)://<your cluster URL or IP>/studio). 
-🌍  If you have installed Agnost locally you can access Agnost Studio at http://localhost/studio
