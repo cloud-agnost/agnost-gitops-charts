@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sync
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: sync
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sync
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 30%
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: sync
+    spec:
+      initContainers:
+      - name: wait-for-redis
+        image: redis:alpine
+        imagePullPolicy: IfNotPresent
+        args: [ 'sh', '-c', 'until redis-cli -h ${CACHE_HOSTNAME} -p 6379 -a ${CACHE_PWD} get hello; do echo "Sleeping a bit..."; sleep 3; done; echo "Redis is ready!";' ]
+        env:
+          - name: CACHE_HOSTNAME
+            valueFrom:
+              secretKeyRef:
+                  name: redis
+                  key: hostname
+          - name: CACHE_PWD
+            valueFrom:
+               secretKeyRef:
+                  name: redis
+                  key: password
+      containers:
+      - name: sync
+        image: {{ .Values.sync.image }}:{{ .Values.sync.tag }}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 4000
+        env:
+          - name: CACHE_HOSTNAME
+            valueFrom:
+              secretKeyRef:
+                  name: redis
+                  key: hostname
+          - name: CACHE_PWD
+            valueFrom:
+              secretKeyRef:
+                  name: redis
+                  key: password
+          - name: NAMESPACE
+            value: {{ .Release.Namespace }}
+          - name: RELEASE_NUMBER
+            value: {{ .Values.sync.tag }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 6
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          failureThreshold: 30
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 6
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 100m
+          limits:
+            memory: 256Mi
+            cpu: 500m
+       
+

@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitor
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: monitor
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 30%
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: monitor
+    spec:
+      serviceAccountName: provisioner-sa
+      initContainers:
+      - name: wait-for-mongo
+        image: rtsp/mongosh:1.10.1
+        imagePullPolicy: IfNotPresent
+        args: [ 'sh', '-c', 'until mongosh "${CLUSTER_DB_URI}" --username ${CLUSTER_DB_USER} --password ${CLUSTER_DB_PWD}; do echo "Sleeping a bit..."; sleep 3; done; echo "MongoDB is ready!";' ]
+        env:
+          - name: CLUSTER_DB_URI
+            valueFrom:
+              secretKeyRef:
+                  name: mongodb
+                  key: databaseURI
+          - name: CLUSTER_DB_USER
+            valueFrom:
+               secretKeyRef:
+                  name: mongodb
+                  key: username            
+          - name: CLUSTER_DB_PWD
+            valueFrom:
+               secretKeyRef:
+                  name: mongodb
+                  key: password
+      containers:
+      - name: monitor
+        image: {{ .Values.monitor.image }}:{{ .Values.monitor.tag }}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 4000
+        env:
+          - name: CLUSTER_DB_URI
+            valueFrom:
+              secretKeyRef:
+                  name: mongodb
+                  key: databaseURI
+          - name: CLUSTER_DB_USER
+            valueFrom:
+              secretKeyRef:
+                  name: mongodb
+                  key: username
+          - name: CLUSTER_DB_PWD
+            valueFrom:
+              secretKeyRef:
+                  name: mongodb
+                  key: password
+          - name: PASSPHRASE
+            valueFrom:
+              secretKeyRef:
+                  name: agnost
+                  key: passPhrase
+          - name: MASTER_TOKEN
+            valueFrom:
+              secretKeyRef:
+                  name: agnost
+                  key: masterToken
+          - name: NAMESPACE
+            value: {{ .Release.Namespace }}
+          - name: RELEASE_NUMBER
+            value: {{ .Values.monitor.tag }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 6
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          failureThreshold: 30
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 6
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 100m
+          limits:
+            memory: 256Mi
+            cpu: 500m
+       
+

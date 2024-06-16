@@ -1,8 +1,7 @@
 ingress-nginx:
   # Install ingress-nginx
   enabled: true
-  # Namespace for ingress-nginx
-  namespaceOverride: "ingress-nginx"
+  fullnameOverride: "ingress-nginx"
   controller:
     autoscaling:
       # Enable/Disable autoscaling for ingress-nginx
@@ -15,15 +14,96 @@ ingress-nginx:
       targetCPUUtilizationPercentage: 80
       # Target Memory Utilization for ingress-nginx replicas when autoscaling is enabled
       targetMemoryUtilizationPercentage: 80
+    # -- resources for the ingress-nginx controller
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+
+  # Platform running the ingress, annotations needed for AWS Elastic Kubernetes Service (EKS),
+  # Azure Kubernetes Service (AKS) and Digital Ocean Kubernetes (DOKS). No extra annotation needed for Google Kubernetes Engine (GKE)
+  # Possible values: [ AKS, DOKS, EKS, GKE ]
+  platform: ""
 
 cert-manager:
   # Install cert-manager
   enabled: true
-  # Namespace for cert-manager
+  # Namespace for cert-manager. Even if you do not install the cert-manager through Agnost helm chart, please make sure that the cert-manager is running in the same namespace
   namespace: "cert-manager"
+  # Do not allow cert-manager resource names to be prefixed with the release name
+  fullnameOverride: "cert-manager"
   startupapicheck:
     # No need for pre checks
     enabled: false
 
-base: 
-  namespaceOverride: "agnost"
+# MongoDB is used for storing the platform data
+mongodb:
+  persistence:
+    # Storage size for MongoDB
+    size: 1Gi
+  # Resources for MongoDB
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 1Gi
+      cpu: 1
+
+# We use Redis to cache mongodb data and also in sync which is the socket.io server of the platform
+redis:
+  persistence:
+    # Storage size for Redis
+    size: 512Mi
+  # Resources for Redis
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+      
+# We primarily use MinIO for storing the platform data and docker images created during the CI/CD pipeline
+minio:
+  persistence:
+    # Storage size for MinIO
+    size: 10Gi
+  # Resources for MinIO
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 1Gi
+      cpu: 1
+
+# We use the agnost-webhook to solve DNS01 challenges for cert-manager.
+agnost-webhook:
+  # Please do not change nameOveeride and fullnameOverride parameer values of the agnost-webhook
+  nameOverride: ""
+  fullnameOverride: "agnost-webhook"
+  # Please make sure that the agnost-webhook can find the cert-manager service account. If you are using a different namespace for cert-manager, please update the namespace and serviceAccountName values
+  certManager:
+    # The namespace cert-manager is running in, this is used to allow cert-manager to discover the agnost DNS01 solver webhook
+    namespace: cert-manager
+    # The name of the service account of the cert-manager, this is used to allow cert-manager to discover the agnost DNS01 solver webhook
+    serviceAccountName: cert-manager
+  image: "gcr.io/agnost-gitops/webhook"
+  tag: "v1.0.0"
+
+platform:
+  image: "gcr.io/agnost-gitops/platform"
+  tag: "v1.0.0"
+
+sync:
+  image: "gcr.io/agnost-gitops/sync"
+  tag: "v1.0.0"
+
+monitor:
+  image: "gcr.io/agnost-gitops/monitor"
+  tag: "v1.0.0"
+
+studio:
+  image: "gcr.io/agnost-gitops/studio"
+  tag: "v1.0.0"

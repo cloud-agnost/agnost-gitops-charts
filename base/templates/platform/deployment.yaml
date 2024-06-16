@@ -1,0 +1,172 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: platform
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 30%
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: platform
+    spec:
+      serviceAccountName: provisioner-sa
+      initContainers:
+      - name: wait-for-redis
+        image: redis:alpine
+        imagePullPolicy: IfNotPresent
+        args: [ 'sh', '-c', 'until redis-cli -h ${CACHE_HOSTNAME} -p 6379 -a ${CACHE_PWD} get hello; do echo "Sleeping a bit..."; sleep 3; done; echo "Redis is ready!";' ]
+        env:
+          - name: CACHE_HOSTNAME
+            valueFrom:
+              secretKeyRef:
+                  name: redis
+                  key: hostname
+          - name: CACHE_PWD
+            valueFrom:
+               secretKeyRef:
+                  name: redis
+                  key: password
+      - name: wait-for-mongo
+        image: rtsp/mongosh:1.10.1
+        imagePullPolicy: IfNotPresent
+        args: [ 'sh', '-c', 'until mongosh "${CLUSTER_DB_URI}" --username ${CLUSTER_DB_USER} --password ${CLUSTER_DB_PWD}; do echo "Sleeping a bit..."; sleep 3; done; echo "MongoDB is ready!";' ]
+        env:
+          - name: CLUSTER_DB_URI
+            valueFrom:
+              secretKeyRef:
+                  name: mongodb
+                  key: databaseURI
+          - name: CLUSTER_DB_USER
+            valueFrom:
+               secretKeyRef:
+                  name: mongodb
+                  key: username            
+          - name: CLUSTER_DB_PWD
+            valueFrom:
+               secretKeyRef:
+                  name: mongodb
+                  key: password
+      containers:
+      - name: platform
+        image: {{ .Values.platform.image }}:{{ .Values.platform.tag }}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 4000
+        env:
+          - name: CACHE_HOSTNAME
+            valueFrom:
+              secretKeyRef:
+                  name: redis
+                  key: hostname
+          - name: CACHE_PWD
+            valueFrom:
+              secretKeyRef:
+                  name: redis
+                  key: password
+          - name: CLUSTER_DB_URI
+            valueFrom:
+              secretKeyRef:
+                  name: mongodb
+                  key: databaseURI
+          - name: CLUSTER_DB_USER
+            valueFrom:
+              secretKeyRef:
+                  name: mongodb
+                  key: username
+          - name: CLUSTER_DB_PWD
+            valueFrom:
+              secretKeyRef:
+                  name: mongodb
+                  key: password
+          - name: PASSPHRASE
+            valueFrom:
+              secretKeyRef:
+                  name: agnost
+                  key: passPhrase
+          - name: CLUSTER_ACCESS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                  name: agnost
+                  key: clusterAccessToken
+          - name: MASTER_TOKEN
+            valueFrom:
+              secretKeyRef:
+                  name: agnost
+                  key: masterToken
+          - name: CLUSTER_SLUG
+            valueFrom:
+              secretKeyRef:
+                name: agnost
+                key: clusterSlug
+          - name: GROUP_NAME
+            value: "agnost.dev"
+          - name: SOLVER_NAME
+            value: "agnost"
+          - name: MINIO_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                  name: minio
+                  key: endpoint
+          - name: MINIO_PORT
+            valueFrom:
+              secretKeyRef:
+                  name: minio
+                  key: port
+          - name: MINIO_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                  name: minio
+                  key: accessKey
+          - name: MINIO_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                  name: minio
+                  key: secretKey
+          - name: WEBHOOK_NAMESPACE
+            value: {{ .Release.Namespace }}
+          - name: WEBHOOK_SERVICE
+            value: {{ index .Values "agnost-webhook" "fullnameOverride" }}
+          - name: NAMESPACE
+            value: {{ .Release.Namespace }}
+          - name: NGINX_NAMESPACE
+            value: {{ index .Values "ingress-nginx" "namespaceOverride" }}
+          - name: CERT_MANAGER_NAMESPACE
+            value: {{ index .Values "cert-manager" "namespace" }}
+          - name: RELEASE_NUMBER
+            value: {{ .Values.platform.tag }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 6
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          failureThreshold: 30
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 6
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 100m
+          limits:
+            memory: 256Mi
+            cpu: 500m
+       
+

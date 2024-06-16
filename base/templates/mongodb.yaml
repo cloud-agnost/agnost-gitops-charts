@@ -1,9 +1,9 @@
-{{ $secret := (lookup "v1" "Secret" .Values.base.namespaceOverride "mongodb") }}
+{{ $secret := (lookup "v1" "Secret" .Release.Namespace "mongodb") }}
 apiVersion: v1
 kind: Secret
 metadata:
   name: mongodb
-  namespace: {{ .Values.base.namespaceOverride }}
+  namespace: {{ .Release.Namespace }}
 type: Opaque
 stringData:
   username: "mongo-admin"
@@ -14,6 +14,7 @@ stringData:
   password: {{ derivePassword 1 "long" .Release.Name .Chart.Name uuidv4 | b64enc | trimSuffix "=" | quote }}
   keyfile: {{ include "randAlphaNumBase64Safe" 756 | b64enc | trimSuffix "=" | quote }}
   {{ end }}
+  databaseURI: "mongodb://mongodb.{{ .Release.Namespace }}/agnost?retryWrites=true&w=majority&authSource=admin"
 
 ---
 
@@ -21,7 +22,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: mongodb
-  namespace: {{ .Values.base.namespaceOverride }}
+  namespace: {{ .Release.Namespace }}
 data:
   mongod.conf: |
     storage:
@@ -30,10 +31,6 @@ data:
       bindIp: 0.0.0.0
     replication:
       replSetName: rs0
-    systemLog:
-      destination: file
-      path: /var/log/mongod.log
-      logAppend: true
     security:
       authorization: enabled
       keyFile: /etc/mongodb-keyfile/keyfile.txt
@@ -43,7 +40,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: mongodb-init
-  namespace: {{ .Values.base.namespaceOverride }}
+  namespace: {{ .Release.Namespace }}
 data:
   mongod.conf: |
     storage:
@@ -52,10 +49,6 @@ data:
       bindIp: 0.0.0.0
     replication:
       replSetName: rs0
-    systemLog:
-      destination: file
-      path: /var/log/mongod.log
-      logAppend: true
       
 ---
 
@@ -63,7 +56,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mongodb
-  namespace: {{ .Values.base.namespaceOverride }}
+  namespace: {{ .Release.Namespace }}
 spec:
   serviceName: mongodb
   replicas: 1
@@ -74,6 +67,9 @@ spec:
       partition: 0
   revisionHistoryLimit: 10
   podManagementPolicy: OrderedReady
+  persistentVolumeClaimRetentionPolicy: 
+    whenDeleted: Retain
+    whenScaled: Retain
   selector:
     matchLabels:
       app: mongodb
@@ -95,11 +91,11 @@ spec:
           name: mongod
         resources:
           requests:
-            memory: 512Mi
-            cpu: 100m
+            memory: {{ .Values.mongodb.resources.requests.memory }}
+            cpu: {{ .Values.mongodb.resources.requests.cpu }}
           limits:
-            memory: 1Gi
-            cpu: 1
+            memory: {{ .Values.mongodb.resources.limits.memory }}
+            cpu: {{ .Values.mongodb.resources.limits.cpu }}
         env:
         - name: MONGO_INITDB_ROOT_USERNAME
           valueFrom:
@@ -130,8 +126,6 @@ spec:
           mountPath: /config
         - name: data
           mountPath: /data/db
-        - name: logs
-          mountPath: /var/log/mongodb
         - name: keyfile
           mountPath: /etc/secrets
           readOnly: true
@@ -146,9 +140,25 @@ spec:
         - >
           cp /etc/secrets/keyfile.txt /etc/mongodb-keyfile/keyfile.txt &&
           chmod 600 /etc/mongodb-keyfile/keyfile.txt &&
+          echo "Starting MongoDB..." &&
           mongod --config /config/mongod.conf --fork --logpath /var/log/mongod.log --dbpath /data/db &&
-          mongosh --eval "rs.initiate({_id: 'rs0', members: [{ _id: 0, host: 'mongodb-0.mongodb.{{ .Values.base.namespaceOverride }}.svc.cluster.local:27017' }]})" &&
+          echo "Started MongoDB..." &&
+          sleep 5 &&
+          RS_STATUS=$(mongosh --quiet --eval "rs.status().ok"); 
+          if [[ $RS_STATUS == 1 ]]; then
+            echo "MongoDB is already initialized.";
+          else
+            echo "Initializing MongoDB...";
+            mongosh --eval "rs.initiate({_id: 'rs0', members: [{ _id: 0, host: 'mongodb-0.mongodb.{{ .Release.Namespace }}.svc.cluster.local:27017' }]})";
+            echo "MongoDB initialized.";
+          fi &&
+          USER_EXISTS=$(mongosh --eval "db.getSiblingDB('admin').getUser('${MONGO_INITDB_ROOT_USERNAME}')" --quiet) &&
+          if [[ $USER_EXISTS != "null" ]]; then
+            mongosh --eval "db.getSiblingDB('admin').dropUser('${MONGO_INITDB_ROOT_USERNAME}')";
+          fi &&
+          echo "Creating user..." &&
           mongosh --eval "db.getSiblingDB('admin').createUser({user: '${MONGO_INITDB_ROOT_USERNAME}', pwd: '${MONGO_INITDB_ROOT_PASSWORD}', roles: [{role: 'root', db: 'admin'}]})" &&
+          echo "Shutting down..." &&
           mongod --shutdown
         imagePullPolicy: IfNotPresent
         env:
@@ -167,8 +177,6 @@ spec:
           mountPath: /config
         - name: data
           mountPath: /data/db
-        - name: logs
-          mountPath: /var/log
         - name: keyfile
           mountPath: /etc/secrets
         - name: keyfile-copy
@@ -195,14 +203,7 @@ spec:
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
-          storage: 1Gi
-  - metadata:
-      name: logs
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      resources:
-        requests:
-          storage: 512Mi
+          storage: {{ .Values.mongodb.persistence.size }}
 
 ---
 
@@ -210,11 +211,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mongodb
-  namespace: {{ .Values.base.namespaceOverride }}
+  namespace: {{ .Release.Namespace }}
 spec:
   ports:
   - port: 27017
+    targetPort: 27017
     name: mongodb
   clusterIP: None
   selector:
     app: mongodb
+

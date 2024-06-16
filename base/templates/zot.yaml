@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: zot
-  namespace: {{ .Values.base.namespaceOverride }}
+  namespace: {{ .Release.Namespace }}
 
 ---
 
@@ -10,9 +10,9 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: zot
-  namespace: {{ .Values.base.namespaceOverride }}
+  namespace: {{ .Release.Namespace }}
 data:
-  config.json: "{\n  \"storage\": {\n    \"rootDirectory\": \"/tmp/zot\",\n    \"dedupe\": false,\n    \"gc\": false,\n    \"storageDriver\": {\n        \"name\": \"s3\",\n        \"regionendpoint\": \"http://minio.{{ .Values.base.namespaceOverride }}:9000\",\n        \"region\": \"us-east-1\",\n        \"bucket\": \"zot-storage\",\n        \"secure\": false,\n        \"skipverify\": false\n    }\n  },\n  \"http\": {\n    \"address\": \"0.0.0.0\",\n    \"port\": \"5000\",\n    \"realm\": \"zot\" },\n  \"log\": { \"level\": \"debug\" },\n  \"extensions\": {\n    \"search\": {\n      \"enable\": true\n    },\n    \"ui\": {\n      \"enable\": true\n    }\n  }\n}"
+  config.json: "{\n  \"storage\": {\n    \"rootDirectory\": \"/tmp/zot\",\n    \"dedupe\": false,\n    \"gc\": false,\n    \"storageDriver\": {\n        \"name\": \"s3\",\n        \"regionendpoint\": \"http://minio.{{ .Release.Namespace }}:9000\",\n        \"region\": \"us-east-1\",\n        \"bucket\": \"zot-storage\",\n        \"secure\": false,\n        \"skipverify\": false\n    }\n  },\n  \"http\": {\n    \"address\": \"0.0.0.0\",\n    \"port\": \"5000\",\n    \"realm\": \"zot\" },\n  \"log\": { \"level\": \"debug\" },\n  \"extensions\": {\n    \"search\": {\n      \"enable\": true\n    },\n    \"ui\": {\n      \"enable\": true\n    }\n  }\n}"
 
 ---
 
@@ -20,7 +20,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zot
-  namespace: {{ .Values.base.namespaceOverride }}
+  namespace: {{ .Release.Namespace }}
 spec:
   serviceName: zot
   replicas: 1
@@ -43,7 +43,7 @@ spec:
       initContainers:
       - name: wait-for-minio
         image: docker.io/curlimages/curl:8.6.0
-        command: ['sh', '-c', 'until curl -s http://minio.{{ .Values.base.namespaceOverride }}:9000/minio/health/live; do echo waiting for minio; sleep 2; done']
+        command: ['sh', '-c', 'until curl -s http://minio.{{ .Release.Namespace }}:9000/minio/health/live; do echo waiting for minio; sleep 2; done']
       containers:
       - name: zot
         image:  ghcr.io/project-zot/zot-linux-amd64:v2.0.4
@@ -100,11 +100,14 @@ apiVersion: v1
 kind: Service
 metadata:
   name: zot
-  namespace: {{ .Values.base.namespaceOverride }}
+  namespace: {{ .Release.Namespace }}
 spec:
+  type: NodePort
   ports:
   - port: 5000
+    targetPort: zot
+    protocol: TCP
     name: zot
-  clusterIP: None
+    nodePort: 30050
   selector:
     app: zot

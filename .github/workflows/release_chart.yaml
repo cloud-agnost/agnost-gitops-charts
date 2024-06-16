@@ -1,0 +1,42 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  release-chart:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout Charts
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          path: charts
+      -
+        name: Checkout Pages
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          path: pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Package Helm Charts
+        run: |
+          cd ./charts
+          mkdir chart-files
+          helm package --dependency-update base
+          mv base-*.tgz  ../pages/
+          helm repo index ../pages/ --url https://cloud-agnost.github.io/agnost-gitops-charts/
+          cp README.md ../pages/
+      -
+        name: Publish on Pages
+        run: |
+          cd ./pages
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "New release"
+          git push
