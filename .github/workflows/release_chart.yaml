@@ -21,7 +21,7 @@ jobs:
         with:
           ref: gh-pages
           path: pages
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
       -
         name: Package Helm Charts
         run: |
