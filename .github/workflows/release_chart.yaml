@@ -9,6 +9,8 @@ on:
 
 jobs:
   release-chart:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       -
@@ -17,11 +19,16 @@ jobs:
         with:
           ref: main
       -
+        name: Configure Git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+      -
         name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         env:
           CR_TOKEN: "${{ secrets.REPO_ACCESS_TOKEN }}"
         with:
-          charts_dir: ./base
+          charts_dir: .
           packages_with_index: true
           pages_branch: gh_pages
