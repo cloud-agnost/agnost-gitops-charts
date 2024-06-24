@@ -1,7 +1,7 @@
 apiVersion: v2
 name: base
 description: Agnost GitOps Platform Installation
-version: 1.0.2
+version: 1.0.1
 appVersion: "1.0.0"
 dependencies:
 - name: ingress-nginx
