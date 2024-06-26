@@ -102,7 +102,7 @@ sync:
 
 monitor:
   image: "europe-docker.pkg.dev/agnost-gitops/images/monitor"
-  tag: "v1.0.1"
+  tag: "v1.0.2"
 
 studio:
   image: "europe-docker.pkg.dev/agnost-gitops/images/studio"
