@@ -63,7 +63,7 @@ redis:
     limits:
       memory: 512Mi
       cpu: 500m
-      
+
 # We primarily use MinIO for storing the platform data and docker images created during the CI/CD pipeline
 minio:
   persistence:
@@ -94,15 +94,15 @@ agnost-webhook:
 
 platform:
   image: "europe-docker.pkg.dev/agnost-gitops/images/platform"
-  tag: "v1.0.0"
+  tag: "v1.0.1"
 
 sync:
   image: "europe-docker.pkg.dev/agnost-gitops/images/sync"
-  tag: "v1.0.0"
+  tag: "v1.0.1"
 
 monitor:
   image: "europe-docker.pkg.dev/agnost-gitops/images/monitor"
-  tag: "v1.0.0"
+  tag: "v1.0.1"
 
 studio:
   image: "europe-docker.pkg.dev/agnost-gitops/images/studio"
