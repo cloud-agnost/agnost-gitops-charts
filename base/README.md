@@ -2,7 +2,7 @@
 
 [agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters
 
-![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square) ![AppVersion: v1.0.2](https://img.shields.io/badge/AppVersion-v1.0.2-informational?style=flat-square)
+![Version: 1.0.5](https://img.shields.io/badge/Version-1.0.5-informational?style=flat-square) ![AppVersion: v1.0.2](https://img.shields.io/badge/AppVersion-v1.0.2-informational?style=flat-square)
 
 This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
@@ -136,7 +136,7 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
 | minio | object | `{"persistence":{"size":"10Gi"},"resources":{"limits":{"cpu":1,"memory":"1Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}}` | We primarily use MinIO for storing the platform data and docker images created during the CI/CD pipeline |
 | minio.persistence.size | string | `"10Gi"` | Storage size for MinIO |
 | minio.resources | object | `{"limits":{"cpu":1,"memory":"1Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resources for MinIO |
-| agnost-webhook | object | `{"certManager":{"namespace":"cert-manager","serviceAccountName":"cert-manager"},"fullnameOverride":"agnost-webhook","image":"europe-docker.pkg.dev/agnost-gitops/images/webhook","nameOverride":"","tag":"v1.0.0"}` | We use the agnost-webhook to solve DNS01 challenges for cert-manager. |
+| agnost-webhook | object | `{"certManager":{"namespace":"cert-manager","serviceAccountName":"cert-manager"},"fullnameOverride":"agnost-webhook","image":{"repository":"europe-docker.pkg.dev/agnost-gitops/images/webhook","tag":"v1.0.0"},"nameOverride":""}` | We use the agnost-webhook to solve DNS01 challenges for cert-manager. |
 | agnost-webhook.nameOverride | string | `""` | Please do not change nameOveeride and fullnameOverride parameer values of the agnost-webhook |
 | agnost-webhook.certManager | object | `{"namespace":"cert-manager","serviceAccountName":"cert-manager"}` | Please make sure that the agnost-webhook can find the cert-manager service account. If you are using a different namespace for cert-manager, please update the namespace and serviceAccountName values |
 | agnost-webhook.certManager.namespace | string | `"cert-manager"` | The namespace cert-manager is running in, this is used to allow cert-manager to discover the agnost DNS01 solver webhook |
