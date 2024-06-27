@@ -1,7 +1,7 @@
 apiVersion: v2
 name: base
 description: Agnost GitOps Platform Installation
-version: 1.0.3
+version: 1.0.4
 appVersion: "v1.0.2"
 dependencies:
 - name: ingress-nginx
@@ -12,6 +12,6 @@ dependencies:
   version: "1.14.5"
   repository: https://charts.jetstack.io
   condition: cert-manager.enabled
-- name: agnost-webhook
+- name: webhook
   version: "1.0.0"
   repository: "file://../webhook"

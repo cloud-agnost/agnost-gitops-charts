@@ -79,7 +79,7 @@ minio:
       cpu: 1
 
 # -- We use the agnost-webhook to solve DNS01 challenges for cert-manager.
-agnost-webhook:
+webhook:
   # -- Please do not change nameOveeride and fullnameOverride parameer values of the agnost-webhook
   nameOverride: ""
   fullnameOverride: "agnost-webhook"

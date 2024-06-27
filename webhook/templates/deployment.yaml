@@ -23,8 +23,8 @@ spec:
       serviceAccountName: {{ include "agnost-webhook.fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.webhook.image }}:{{ .Values.webhook.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.image }}:{{ .Values.tag }}"
+          imagePullPolicy: {{ .Values.pullPolicy }}
           args:
             - --tls-cert-file=/tls/tls.crt
             - --tls-private-key-file=/tls/tls.key

@@ -12,10 +12,9 @@ certManager:
   namespace: cert-manager
   serviceAccountName: cert-manager
 
-image:
-  repository: mycompany/webhook-image
-  tag: latest
-  pullPolicy: IfNotPresent
+image: mycompany/webhook-image
+tag: latest
+pullPolicy: IfNotPresent
 
 nameOverride: ""
 fullnameOverride: ""
