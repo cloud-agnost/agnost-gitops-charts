@@ -2,7 +2,7 @@
 
 [agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters
 
-![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![AppVersion: v0.0.1](https://img.shields.io/badge/AppVersion-v0.0.1-informational?style=flat-square)
+![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square) ![AppVersion: v0.0.1](https://img.shields.io/badge/AppVersion-v0.0.1-informational?style=flat-square)
 
 This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
@@ -149,12 +149,6 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
 | cert-manager.namespace | string | `"cert-manager"` | Namespace for cert-manager. Even if you do not install the cert-manager through Agnost helm chart, please make sure that the cert-manager is running in the same namespace |
 | cert-manager.fullnameOverride | string | `"cert-manager"` | Do not allow cert-manager resource names to be prefixed with the release name |
 | cert-manager.startupapicheck.enabled | bool | `false` | No need for pre checks |
-| mongodb.persistence.size | string | `"1Gi"` | Storage size for MongoDB |
-| mongodb.resources | object | `{"limits":{"cpu":1,"memory":"1Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resources for MongoDB |
-| redis.persistence.size | string | `"512Mi"` | Storage size for Redis |
-| redis.resources | object | `{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resources for Redis |
-| minio.persistence.size | string | `"10Gi"` | Storage size for MinIO |
-| minio.resources | object | `{"limits":{"cpu":1,"memory":"1Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resources for MinIO |
 | agnost-webhook.nameOverride | string | `""` | Please do not change nameOverride parameter value of the agnost-webhook |
 | agnost-webhook.fullnameOverride | string | `"agnost-webhook"` | Please do not change fullnameOverride parameter value of the agnost-webhook |
 | agnost-webhook.certManager.namespace | string | `"cert-manager"` | The namespace cert-manager is running in, this is used to allow cert-manager to discover the agnost DNS01 solver webhook |
