@@ -27,7 +27,9 @@ jobs:
       -
         name: Package Helm Charts
         run: |
-          sudo dpkg -i https://github.com/norwoodj/helm-docs/releases/download/v1.13.1/helm-docs_1.13.1_Linux_x86_64.rpm
+          export HELM_DOC_VERSION=1.13.1
+          wget https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOC_VERSION}/helm-docs_${HELM_DOC_VERSION}_Linux_x86_64.deb
+          sudo dpkg -i helm-docs_${HELM_DOC_VERSION}_Linux_x86_64.deb
           cd ./charts
           mkdir chart-files
           helm-docs -g base  --ignore-non-descriptions --sort-values-order file
