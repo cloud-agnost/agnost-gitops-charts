@@ -2,7 +2,7 @@
 
 [agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters
 
-![Version: 1.0.5](https://img.shields.io/badge/Version-1.0.5-informational?style=flat-square) ![AppVersion: v1.0.2](https://img.shields.io/badge/AppVersion-v1.0.2-informational?style=flat-square)
+![Version: 1.0.6](https://img.shields.io/badge/Version-1.0.6-informational?style=flat-square) ![AppVersion: v1.0.2](https://img.shields.io/badge/AppVersion-v1.0.2-informational?style=flat-square)
 
 This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
@@ -122,25 +122,31 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
 | ingress-nginx.controller.autoscaling.maxReplicas | int | `5` | Maximum ingress-nginx replicas when autoscaling is enabled |
 | ingress-nginx.controller.autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU Utilization for ingress-nginx replicas when autoscaling is enabled |
 | ingress-nginx.controller.autoscaling.targetMemoryUtilizationPercentage | int | `80` | Target Memory Utilization for ingress-nginx replicas when autoscaling is enabled |
-| ingress-nginx.platform | string | `""` | Possible values: [ AKS, DOKS, EKS, GKE ] |
+| ingress-nginx.controller.resources | object | `{"requests":{"cpu":"100m","memory":"100Mi"}}` | resources for the ingress-nginx controller |
 | cert-manager.enabled | bool | `true` | Install cert-manager |
 | cert-manager.namespace | string | `"cert-manager"` | Namespace for cert-manager. Even if you do not install the cert-manager through Agnost helm chart, please make sure that the cert-manager is running in the same namespace |
 | cert-manager.fullnameOverride | string | `"cert-manager"` | Do not allow cert-manager resource names to be prefixed with the release name |
 | cert-manager.startupapicheck.enabled | bool | `false` | No need for pre checks |
-| mongodb | object | `{"persistence":{"size":"1Gi"},"resources":{"limits":{"cpu":1,"memory":"1Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}}` | MongoDB is used for storing the platform data |
 | mongodb.persistence.size | string | `"1Gi"` | Storage size for MongoDB |
 | mongodb.resources | object | `{"limits":{"cpu":1,"memory":"1Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resources for MongoDB |
-| redis | object | `{"persistence":{"size":"512Mi"},"resources":{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"256Mi"}}}` | We use Redis to cache mongodb data and also in sync which is the socket.io server of the platform |
 | redis.persistence.size | string | `"512Mi"` | Storage size for Redis |
 | redis.resources | object | `{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resources for Redis |
-| minio | object | `{"persistence":{"size":"10Gi"},"resources":{"limits":{"cpu":1,"memory":"1Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}}` | We primarily use MinIO for storing the platform data and docker images created during the CI/CD pipeline |
 | minio.persistence.size | string | `"10Gi"` | Storage size for MinIO |
 | minio.resources | object | `{"limits":{"cpu":1,"memory":"1Gi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resources for MinIO |
-| agnost-webhook | object | `{"certManager":{"namespace":"cert-manager","serviceAccountName":"cert-manager"},"fullnameOverride":"agnost-webhook","image":{"repository":"europe-docker.pkg.dev/agnost-gitops/images/webhook","tag":"v1.0.0"},"nameOverride":""}` | We use the agnost-webhook to solve DNS01 challenges for cert-manager. |
-| agnost-webhook.nameOverride | string | `""` | Please do not change nameOveeride and fullnameOverride parameer values of the agnost-webhook |
-| agnost-webhook.certManager | object | `{"namespace":"cert-manager","serviceAccountName":"cert-manager"}` | Please make sure that the agnost-webhook can find the cert-manager service account. If you are using a different namespace for cert-manager, please update the namespace and serviceAccountName values |
+| agnost-webhook.nameOverride | string | `""` | Please do not change nameOverride parameter value of the agnost-webhook |
+| agnost-webhook.fullnameOverride | string | `"agnost-webhook"` | Please do not change fullnameOverride parameter value of the agnost-webhook |
 | agnost-webhook.certManager.namespace | string | `"cert-manager"` | The namespace cert-manager is running in, this is used to allow cert-manager to discover the agnost DNS01 solver webhook |
 | agnost-webhook.certManager.serviceAccountName | string | `"cert-manager"` | The name of the service account of the cert-manager, this is used to allow cert-manager to discover the agnost DNS01 solver webhook |
+| agnost-webhook.image.repository | string | `"europe-docker.pkg.dev/agnost-gitops/images/webhook"` | agnost-webhook image name |
+| agnost-webhook.image.tag | string | `"v1.0.0"` | agnost-webhook image tag |
+| platform.image | string | `"europe-docker.pkg.dev/agnost-gitops/images/platform"` | platform image name |
+| platform.tag | string | `"v1.0.1"` | platform image tag |
+| sync.image | string | `"europe-docker.pkg.dev/agnost-gitops/images/sync"` | sync image name |
+| sync.tag | string | `"v1.0.1"` | sync image tag |
+| monitor.image | string | `"europe-docker.pkg.dev/agnost-gitops/images/monitor"` | monitor image name |
+| monitor.tag | string | `"v1.0.2"` | monitor image tag |
+| studio.image | string | `"europe-docker.pkg.dev/agnost-gitops/images/studio"` | studio image name |
+| studio.tag | string | `"v1.0.0"` | studio image tag |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.13.1](https://github.com/norwoodj/helm-docs/releases/v1.13.1)
