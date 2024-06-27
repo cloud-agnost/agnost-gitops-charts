@@ -1,0 +1,113 @@
+# agnost-gitops base helm chart
+
+[agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
+
+This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+
+{{ template "chart.requirementsSection" . }}
+
+## Get Repo Info
+
+```console
+helm repo add agnost-gitops https://cloud-agnost.github.io/agnost-gitops-charts/
+helm repo update
+```
+
+## Install Chart
+
+**Important:** only helm3 is supported
+
+```console
+helm install [RELEASE_NAME] agnost-gitops/base
+```
+
+The command deploys agnost-gitops on the Kubernetes cluster in the default configuration.
+
+_See [configuration](#configuration) below._
+
+_See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation._
+
+## Uninstall Chart
+
+```console
+helm uninstall [RELEASE_NAME]
+```
+
+This removes all the Kubernetes components associated with the chart and deletes the release.
+
+_See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation._
+
+## Upgrading Chart
+
+```console
+helm upgrade [RELEASE_NAME] [CHART] --install
+```
+
+_See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation._
+
+## Configuration
+
+See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
+
+```console
+helm show values agnost-gitops/base
+```
+
+## Minikube Installation
+
+Create a Minikube cluster with `ingress-nginx` addon enabled, and install the chart:
+
+```bash
+minikube start --cpus=4 --memory=8192 --addons=ingress
+
+helm upgrade --install agnost-gitops agnost-gitops/base --set ingress-nginx.enabled=false
+```
+
+## GKE Installation
+
+This chart installs `ingress-nginx` by default. If you already have it running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter:
+
+```bash
+helm upgrade --install agnost-gitops agnost-gitops/base
+```
+
+## EKS Installation (AWS Elastic Kubernetes Service)
+
+EKS requires some settings for the `ingress-nginx`, if you already have it installed on your cluster, run the same helm commmand as [Minikube installation](#minikube-installation)
+
+Otherwise, please use the custom values file for EKS:
+
+```bash
+helm upgrade --install agnost-gitops agnost-gitops/base \
+  -f https://github.com/cloud-agnost/agnost-gitops-charts/blob/main/custom-values/eks-values.yaml
+```
+
+## AKS Installation (Azure Kubernetes Service)
+
+AKS requires some settings for the `ingress-nginx`, if you already have it installed on your cluster, run the same helm commmand as [Minikube installation](#minikube-installation)
+
+Otherwise, please use the custom values file for AKS:
+
+```bash
+helm upgrade --install agnost-gitops agnost-gitops/base \
+  -f https://github.com/cloud-agnost/agnost-gitops-charts/blob/main/custom-values/aks-values.yaml
+```
+
+## DOKS Installation (Digital Ocean Kubernetes Service)
+
+DOKS requires some settings for the `ingress-nginx`, if you already have it installed on your cluster, run the same helm commmand as [Minikube installation](#minikube-installation)
+
+Otherwise, please use the custom values file for DOKS:
+
+```bash
+helm upgrade --install agnost-gitops agnost-gitops/base \
+  -f https://github.com/cloud-agnost/agnost-gitops-charts/blob/main/custom-values/doks-values.yaml
+```
+
+
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}
