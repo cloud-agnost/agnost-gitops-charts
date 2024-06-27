@@ -33,10 +33,10 @@ jobs:
           sudo dpkg -i helm-docs_${HELM_DOC_VERSION}_Linux_x86_64.deb
           cd ./charts
           mkdir chart-files
-          helm-docs -g base --ignore-non-descriptions --sort-values-order file
           helm package --dependency-update base
           mv base-*.tgz  ../pages/
           helm repo index ../pages/ --url https://cloud-agnost.github.io/agnost-gitops-charts/
+          helm-docs -g base --ignore-non-descriptions --sort-values-order file
           cp base/README.md ../pages/
           cp base/README.md .
           git config user.name github-actions
