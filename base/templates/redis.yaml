@@ -82,11 +82,11 @@ spec:
           name: redis
         resources:
           requests:
-            memory: {{ .Values.redis.resources.requests.memory }}
-            cpu: {{ .Values.redis.resources.requests.cpu }}
+            memory: 256Mi
+            cpu: 100m
           limits:
-            memory: {{ .Values.redis.resources.limits.memory }}
-            cpu: {{ .Values.redis.resources.limits.cpu }}
+            memory: 512Mi
+            cpu: 500m
         env:
         - name: REDIS_PASSWORD
           valueFrom:
@@ -133,7 +133,7 @@ spec:
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
-          storage: {{ .Values.redis.persistence.size }}
+          storage: 512Mi
 
 ---
 

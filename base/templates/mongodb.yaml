@@ -91,11 +91,11 @@ spec:
           name: mongod
         resources:
           requests:
-            memory: {{ .Values.mongodb.resources.requests.memory }}
-            cpu: {{ .Values.mongodb.resources.requests.cpu }}
+            memory: 256Mi
+            cpu: 100m
           limits:
-            memory: {{ .Values.mongodb.resources.limits.memory }}
-            cpu: {{ .Values.mongodb.resources.limits.cpu }}
+            memory: 1Gi
+            cpu: 1
         env:
         - name: MONGO_INITDB_ROOT_USERNAME
           valueFrom:
@@ -203,7 +203,7 @@ spec:
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
-          storage: {{ .Values.mongodb.persistence.size }}
+          storage: 1Gi
 
 ---
 

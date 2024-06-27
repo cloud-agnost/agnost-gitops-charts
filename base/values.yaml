@@ -32,48 +32,6 @@ cert-manager:
     # -- No need for pre checks
     enabled: false
 
-# MongoDB is used for storing the platform data
-mongodb:
-  persistence:
-    # -- Storage size for MongoDB
-    size: 1Gi
-  # -- Resources for MongoDB
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 100m
-    limits:
-      memory: 1Gi
-      cpu: 1
-
-# We use Redis to cache mongodb data and also in sync which is the socket.io server of the platform
-redis:
-  persistence:
-    # -- Storage size for Redis
-    size: 512Mi
-  # -- Resources for Redis
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 100m
-    limits:
-      memory: 512Mi
-      cpu: 500m
-
-# We primarily use MinIO for storing the platform data and docker images created during the CI/CD pipeline
-minio:
-  persistence:
-    # -- Storage size for MinIO
-    size: 10Gi
-  # -- Resources for MinIO
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 100m
-    limits:
-      memory: 1Gi
-      cpu: 1
-
 # We use the agnost-webhook to solve DNS01 challenges for cert-manager.
 agnost-webhook:
   # -- Please do not change nameOverride parameter value of the agnost-webhook

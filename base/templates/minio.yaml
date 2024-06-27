@@ -69,11 +69,11 @@ spec:
           protocol: TCP
         resources:
           requests:
-            memory: {{ .Values.minio.resources.requests.memory }}
-            cpu: {{ .Values.minio.resources.requests.cpu }}
+            memory: 256Mi
+            cpu: 100m
           limits:
-            memory: {{ .Values.minio.resources.limits.memory }}
-            cpu: {{ .Values.minio.resources.limits.cpu }}
+            memory: 1Gi
+            cpu: 1
         env:
         - name: MINIO_ROOT_USER
           valueFrom:
@@ -111,7 +111,7 @@ spec:
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
-          storage: {{ .Values.minio.persistence.size }}
+          storage: 10Gi
 
 ---
 
