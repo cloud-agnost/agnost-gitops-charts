@@ -79,7 +79,7 @@ minio:
       cpu: 1
 
 # -- We use the agnost-webhook to solve DNS01 challenges for cert-manager.
-webhook:
+agnost-webhook:
   # -- Please do not change nameOveeride and fullnameOverride parameer values of the agnost-webhook
   nameOverride: ""
   fullnameOverride: "agnost-webhook"
@@ -89,8 +89,9 @@ webhook:
     namespace: cert-manager
     # -- The name of the service account of the cert-manager, this is used to allow cert-manager to discover the agnost DNS01 solver webhook
     serviceAccountName: cert-manager
-  image: "europe-docker.pkg.dev/agnost-gitops/images/webhook"
-  tag: "v1.0.0"
+  image:
+    repository: "europe-docker.pkg.dev/agnost-gitops/images/webhook"
+    tag: "v1.0.0"
 
 platform:
   image: "europe-docker.pkg.dev/agnost-gitops/images/platform"
