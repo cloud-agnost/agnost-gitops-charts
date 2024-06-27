@@ -17,6 +17,7 @@ jobs:
         with:
           ref: main
           path: charts
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
       -
         name: Checkout Pages
         uses: actions/checkout@v3
