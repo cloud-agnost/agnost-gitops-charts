@@ -2,6 +2,7 @@ ingress-nginx:
   # -- Install ingress-nginx
   enabled: true
   fullnameOverride: "ingress-nginx"
+  namespaceOverride: "ingress-nginx"
   controller:
     autoscaling:
       # -- Enable/Disable autoscaling for ingress-nginx
@@ -14,16 +15,11 @@ ingress-nginx:
       targetCPUUtilizationPercentage: 80
       # -- Target Memory Utilization for ingress-nginx replicas when autoscaling is enabled
       targetMemoryUtilizationPercentage: 80
-    # -- -- resources for the ingress-nginx controller
+    # -- resources for the ingress-nginx controller
     resources:
       requests:
         cpu: 100m
         memory: 100Mi
-
-  # -- Platform running the ingress, annotations needed for AWS Elastic Kubernetes Service (EKS),
-  # -- Azure Kubernetes Service (AKS) and Digital Ocean Kubernetes (DOKS). No extra annotation needed for Google Kubernetes Engine (GKE)
-  # -- Possible values: [ AKS, DOKS, EKS, GKE ]
-  platform: ""
 
 cert-manager:
   # -- Install cert-manager
@@ -36,7 +32,7 @@ cert-manager:
     # -- No need for pre checks
     enabled: false
 
-# -- MongoDB is used for storing the platform data
+# MongoDB is used for storing the platform data
 mongodb:
   persistence:
     # -- Storage size for MongoDB
@@ -50,7 +46,7 @@ mongodb:
       memory: 1Gi
       cpu: 1
 
-# -- We use Redis to cache mongodb data and also in sync which is the socket.io server of the platform
+# We use Redis to cache mongodb data and also in sync which is the socket.io server of the platform
 redis:
   persistence:
     # -- Storage size for Redis
@@ -64,7 +60,7 @@ redis:
       memory: 512Mi
       cpu: 500m
 
-# -- We primarily use MinIO for storing the platform data and docker images created during the CI/CD pipeline
+# We primarily use MinIO for storing the platform data and docker images created during the CI/CD pipeline
 minio:
   persistence:
     # -- Storage size for MinIO
@@ -78,34 +74,45 @@ minio:
       memory: 1Gi
       cpu: 1
 
-# -- We use the agnost-webhook to solve DNS01 challenges for cert-manager.
+# We use the agnost-webhook to solve DNS01 challenges for cert-manager.
 agnost-webhook:
-  # -- Please do not change nameOveeride and fullnameOverride parameer values of the agnost-webhook
+  # -- Please do not change nameOverride parameter value of the agnost-webhook
   nameOverride: ""
+  # -- Please do not change fullnameOverride parameter value of the agnost-webhook
   fullnameOverride: "agnost-webhook"
-  # -- Please make sure that the agnost-webhook can find the cert-manager service account. If you are using a different namespace for cert-manager, please update the namespace and serviceAccountName values
+  # Please make sure that the agnost-webhook can find the cert-manager service account. If you are using a different namespace for cert-manager, please update the namespace and serviceAccountName values
   certManager:
     # -- The namespace cert-manager is running in, this is used to allow cert-manager to discover the agnost DNS01 solver webhook
     namespace: cert-manager
     # -- The name of the service account of the cert-manager, this is used to allow cert-manager to discover the agnost DNS01 solver webhook
     serviceAccountName: cert-manager
   image:
+    # -- agnost-webhook image name
     repository: "europe-docker.pkg.dev/agnost-gitops/images/webhook"
+    # -- agnost-webhook image tag
     tag: "v1.0.0"
 
 platform:
+  # -- platform image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/platform"
+  # -- platform image tag
   tag: "v1.0.1"
 
 sync:
+  # -- sync image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/sync"
+  # -- sync image tag
   tag: "v1.0.1"
 
 monitor:
+  # -- monitor image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/monitor"
+  # -- monitor image tag
   tag: "v1.0.2"
 
 studio:
+  # -- studio image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/studio"
+  # -- studio image tag
   tag: "v1.0.0"
 
