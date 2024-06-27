@@ -81,7 +81,7 @@ Otherwise, please use the custom values file for EKS:
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
-  -f https://github.com/cloud-agnost/agnost-gitops-charts/blob/main/custom-values/eks-values.yaml
+  -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/eks-values.yaml
 ```
 
 ## AKS Installation (Azure Kubernetes Service)
@@ -92,7 +92,7 @@ Otherwise, please use the custom values file for AKS:
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
-  -f https://github.com/cloud-agnost/agnost-gitops-charts/blob/main/custom-values/aks-values.yaml
+  -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/aks-values.yaml
 ```
 
 ## DOKS Installation (Digital Ocean Kubernetes Service)
@@ -103,10 +103,8 @@ Otherwise, please use the custom values file for DOKS:
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
-  -f https://github.com/cloud-agnost/agnost-gitops-charts/blob/main/custom-values/doks-values.yaml
+  -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/doks-values.yaml
 ```
-
-
 
 {{ template "chart.valuesSection" . }}
 
