@@ -2,7 +2,7 @@
 
 [agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters
 
-![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square) ![AppVersion: v1.0.1](https://img.shields.io/badge/AppVersion-v1.0.1-informational?style=flat-square)
+![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square) ![AppVersion: v1.0.2](https://img.shields.io/badge/AppVersion-v1.0.2-informational?style=flat-square)
 
 This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
@@ -87,7 +87,7 @@ Otherwise, please use the custom values file for EKS:
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
-  -f https://github.com/cloud-agnost/agnost-gitops-charts/blob/main/custom-values/eks-values.yaml
+  -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/eks-values.yaml
 ```
 
 ## AKS Installation (Azure Kubernetes Service)
@@ -98,7 +98,7 @@ Otherwise, please use the custom values file for AKS:
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
-  -f https://github.com/cloud-agnost/agnost-gitops-charts/blob/main/custom-values/aks-values.yaml
+  -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/aks-values.yaml
 ```
 
 ## DOKS Installation (Digital Ocean Kubernetes Service)
@@ -109,7 +109,7 @@ Otherwise, please use the custom values file for DOKS:
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
-  -f https://github.com/cloud-agnost/agnost-gitops-charts/blob/main/custom-values/doks-values.yaml
+  -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/doks-values.yaml
 ```
 
 ## Values
