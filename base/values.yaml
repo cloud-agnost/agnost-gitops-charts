@@ -4,6 +4,8 @@ ingress-nginx:
   fullnameOverride: "ingress-nginx"
   namespaceOverride: "ingress-nginx"
   controller:
+    admissionWebhooks:
+      enabled: false
     autoscaling:
       # -- Enable/Disable autoscaling for ingress-nginx
       enabled: true
@@ -15,7 +17,7 @@ ingress-nginx:
       targetCPUUtilizationPercentage: 80
       # -- Target Memory Utilization for ingress-nginx replicas when autoscaling is enabled
       targetMemoryUtilizationPercentage: 80
-    # -- resources for the ingress-nginx controller
+    # resources for the ingress-nginx controller
     resources:
       requests:
         cpu: 100m
@@ -45,32 +47,32 @@ agnost-webhook:
     # -- The name of the service account of the cert-manager, this is used to allow cert-manager to discover the agnost DNS01 solver webhook
     serviceAccountName: cert-manager
   image:
-    # -- agnost-webhook image name
+    # agnost-webhook image name
     repository: "europe-docker.pkg.dev/agnost-gitops/images/webhook"
-    # -- agnost-webhook image tag
+    # agnost-webhook image tag
     tag: "v1.0.0"
 
 platform:
-  # -- platform image name
+  # platform image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/platform"
-  # -- platform image tag
+  # platform image tag
   tag: "v1.0.1"
 
 sync:
-  # -- sync image name
+  # sync image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/sync"
-  # -- sync image tag
+  # sync image tag
   tag: "v1.0.1"
 
 monitor:
-  # -- monitor image name
+  # monitor image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/monitor"
-  # -- monitor image tag
+  # monitor image tag
   tag: "v1.0.2"
 
 studio:
-  # -- studio image name
+  # studio image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/studio"
-  # -- studio image tag
+  # studio image tag
   tag: "v1.0.0"
 

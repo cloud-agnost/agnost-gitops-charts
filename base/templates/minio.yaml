@@ -1,4 +1,6 @@
 {{ $secret := (lookup "v1" "Secret" .Release.Namespace "minio") }}
+{{ $sts := (lookup "apps/v1" "StatefulSet" .Release.Namespace "minio") }}
+---
 apiVersion: v1
 kind: Secret
 metadata:
@@ -24,7 +26,11 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   serviceName: minio
+  {{- if not .Release.IsUpgrade }}
   replicas: 1
+  {{- else }}
+  replicas: {{ $sts.spec.replicas }}
+  {{- end }}
   updateStrategy:
     type: RollingUpdate
     rollingUpdate:
@@ -68,12 +74,16 @@ spec:
           name: http-console
           protocol: TCP
         resources:
+        {{- if not .Release.IsUpgrade }}
           requests:
             memory: 256Mi
             cpu: 100m
           limits:
             memory: 1Gi
             cpu: 1
+        {{- else }}
+          {{ (index $sts.spec.template.spec.containers 0).resources | toYaml | indent 10 | trim }}
+        {{- end }}
         env:
         - name: MINIO_ROOT_USER
           valueFrom:
@@ -111,7 +121,11 @@ spec:
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
+          {{- if not .Release.IsUpgrade }}
           storage: 10Gi
+          {{- else }}
+          storage: {{ (index $sts.spec.volumeClaimTemplates 0).spec.resources.requests.storage }}
+          {{- end }}
 
 ---
 

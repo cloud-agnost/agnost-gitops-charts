@@ -1,4 +1,6 @@
 {{ $secret := (lookup "v1" "Secret" .Release.Namespace "mongodb") }}
+{{ $sts := (lookup "apps/v1" "StatefulSet" .Release.Namespace "mongodb") }}
+---
 apiVersion: v1
 kind: Secret
 metadata:
@@ -59,7 +61,11 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   serviceName: mongodb
+  {{- if not .Release.IsUpgrade }}
   replicas: 1
+  {{- else }}
+  replicas: {{ $sts.spec.replicas }}
+  {{- end }}
   updateStrategy:
     type: RollingUpdate
     rollingUpdate:
@@ -90,12 +96,16 @@ spec:
         - containerPort: 27017
           name: mongod
         resources:
+        {{- if not .Release.IsUpgrade }}
           requests:
             memory: 256Mi
             cpu: 100m
           limits:
             memory: 1Gi
             cpu: 1
+        {{- else }}
+          {{ (index $sts.spec.template.spec.containers 0).resources | toYaml | indent 10 | trim }}
+        {{- end }}
         env:
         - name: MONGO_INITDB_ROOT_USERNAME
           valueFrom:
@@ -203,7 +213,11 @@ spec:
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
+          {{- if not .Release.IsUpgrade }}
           storage: 1Gi
+          {{- else }}
+          storage: {{ (index $sts.spec.volumeClaimTemplates 0).spec.resources.requests.storage }}
+          {{- end }}
 
 ---
 

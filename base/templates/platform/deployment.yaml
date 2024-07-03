@@ -1,3 +1,5 @@
+{{ $dply := (lookup "apps/v1" "Deployment" .Release.Namespace "platform") }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,7 +8,11 @@ metadata:
   labels:
     app: platform
 spec:
+  {{- if not .Release.IsUpgrade }}
   replicas: 1
+  {{- else }}
+  replicas: {{ $dply.spec.replicas }}
+  {{- end }}
   selector:
     matchLabels:
       app: platform
@@ -162,11 +168,13 @@ spec:
           periodSeconds: 30
           timeoutSeconds: 6
         resources:
+        {{- if not .Release.IsUpgrade }}
           requests:
             memory: 128Mi
             cpu: 100m
           limits:
             memory: 256Mi
             cpu: 500m
-       
-
+        {{- else }}
+          {{ (index $dply.spec.template.spec.containers 0).resources | toYaml | indent 10 | trim }}
+        {{- end }}
