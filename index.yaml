@@ -3,7 +3,28 @@ entries:
   base:
   - apiVersion: v2
     appVersion: v0.0.1
-    created: "2024-06-27T15:11:04.987229636Z"
+    created: "2024-07-03T21:03:21.259255346Z"
+    dependencies:
+    - condition: ingress-nginx.enabled
+      name: ingress-nginx
+      repository: https://kubernetes.github.io/ingress-nginx
+      version: 4.10.1
+    - condition: cert-manager.enabled
+      name: cert-manager
+      repository: https://charts.jetstack.io
+      version: 1.14.5
+    - name: agnost-webhook
+      repository: file://../webhook
+      version: 1.0.0
+    description: Agnost GitOps Platform Installation
+    digest: 9cfb8ba4cb00a17c63d452bab36aa85345c2bfd81cd4968d2ed456a93f1e3549
+    name: base
+    urls:
+    - https://cloud-agnost.github.io/agnost-gitops-charts/base-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
+    appVersion: v0.0.1
+    created: "2024-07-03T21:03:21.250258001Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -24,7 +45,7 @@ entries:
     version: 0.0.2
   - apiVersion: v2
     appVersion: v0.0.1
-    created: "2024-06-27T15:11:04.978259666Z"
+    created: "2024-07-03T21:03:21.240833769Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -43,4 +64,4 @@ entries:
     urls:
     - https://cloud-agnost.github.io/agnost-gitops-charts/base-0.0.1.tgz
     version: 0.0.1
-generated: "2024-06-27T15:11:04.968350223Z"
+generated: "2024-07-03T21:03:21.231559518Z"
