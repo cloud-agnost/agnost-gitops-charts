@@ -2,7 +2,7 @@
 
 [agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters
 
-![Version: 0.0.4](https://img.shields.io/badge/Version-0.0.4-informational?style=flat-square) ![AppVersion: v0.0.2](https://img.shields.io/badge/AppVersion-v0.0.2-informational?style=flat-square)
+![Version: 0.0.5](https://img.shields.io/badge/Version-0.0.5-informational?style=flat-square) ![AppVersion: v0.0.2](https://img.shields.io/badge/AppVersion-v0.0.2-informational?style=flat-square)
 
 This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
@@ -71,6 +71,8 @@ minikube start --cpus=4 --memory=8192
 helm upgrade --install agnost-gitops agnost-gitops/base
 ```
 
+> Please refer to [Minikube Documentation](https://minikube.sigs.k8s.io/docs/start/) for more information.
+
 ## GKE Installation (Google Kubernetes Engine)
 
 This chart installs `ingress-nginx` by default. If you already have it running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter:
@@ -85,6 +87,8 @@ Otherwise, install it with default options:
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base
 ```
+
+> Please refer to [GCP documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters) to learn more about GKE cluster creation and maintenance.
 
 ## EKS Installation (AWS Elastic Kubernetes Service)
 
@@ -102,6 +106,8 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
   -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/eks-values.yaml
 ```
 
+> Please refer to [AWS Documentation](https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html) to learn more about EKS cluster creation and maintenance.
+
 ## AKS Installation (Azure Kubernetes Service)
 
 This chart installs `ingress-nginx` by default. If you already have it running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter:
@@ -118,6 +124,8 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
   -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/aks-values.yaml
 ```
 
+> Please refer to [Azure Documentation](https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-portal?tabs=azure-cli) to learn more about AKS cluster creation and maintenance.
+
 ## DOKS Installation (Digital Ocean Kubernetes Service)
 
 This chart installs `ingress-nginx` by default. If you already have it running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter:
@@ -133,6 +141,8 @@ Otherwise, please use the custom values file for DOKS:
 helm upgrade --install agnost-gitops agnost-gitops/base \
   -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/doks-values.yaml
 ```
+
+> Please refer to [Digital Ocean Documentation](https://docs.digitalocean.com/products/kubernetes/how-to/create-clusters/) to learn more about DOKS cluster creation and maintenance.
 
 ## Values
 
