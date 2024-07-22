@@ -2,7 +2,7 @@
 
 [agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters
 
-![Version: 0.0.5](https://img.shields.io/badge/Version-0.0.5-informational?style=flat-square) ![AppVersion: v0.0.2](https://img.shields.io/badge/AppVersion-v0.0.2-informational?style=flat-square)
+![Version: 0.0.6](https://img.shields.io/badge/Version-0.0.6-informational?style=flat-square) ![AppVersion: v0.0.2](https://img.shields.io/badge/AppVersion-v0.0.2-informational?style=flat-square)
 
 This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
@@ -55,7 +55,7 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 
 ## Configuration
 
-See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
+See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](https://github.com/cloud-agnost/agnost-gitops-charts/blob/main/base/values.yaml), or run these configuration commands:
 
 ```console
 helm show values agnost-gitops/base
@@ -68,7 +68,8 @@ Create a Minikube cluster with `ingress-nginx` addon enabled, and install the ch
 ```bash
 minikube start --cpus=4 --memory=8192
 
-helm upgrade --install agnost-gitops agnost-gitops/base
+helm upgrade --install agnost-gitops agnost-gitops/base \
+  --namespace agnost --create-namespace
 ```
 
 > Please refer to [Minikube Documentation](https://minikube.sigs.k8s.io/docs/start/) for more information.
@@ -79,13 +80,15 @@ This chart installs `ingress-nginx` by default. If you already have it running o
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
+  --namespace agnost --create-namespace \
   --set ingress-nginx.enabled=false
 ```
 
 Otherwise, install it with default options:
 
 ```bash
-helm upgrade --install agnost-gitops agnost-gitops/base
+helm upgrade --install agnost-gitops agnost-gitops/base \
+  --namespace agnost --create-namespace
 ```
 
 > Please refer to [GCP documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters) to learn more about GKE cluster creation and maintenance.
@@ -96,6 +99,7 @@ This chart installs `ingress-nginx` by default. If you already have it running o
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
+  --namespace agnost --create-namespace \
   --set ingress-nginx.enabled=false
 ```
 
@@ -103,6 +107,7 @@ Otherwise, please use the custom values file for EKS:
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
+  --namespace agnost --create-namespace \
   -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/eks-values.yaml
 ```
 
@@ -114,6 +119,7 @@ This chart installs `ingress-nginx` by default. If you already have it running o
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
+  --namespace agnost --create-namespace \
   --set ingress-nginx.enabled=false
 ```
 
@@ -121,6 +127,7 @@ Otherwise, please use the custom values file for AKS:
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
+  --namespace agnost --create-namespace \
   -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/aks-values.yaml
 ```
 
@@ -132,6 +139,7 @@ This chart installs `ingress-nginx` by default. If you already have it running o
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
+  --namespace agnost --create-namespace \
   --set ingress-nginx.enabled=false
 ```
 
@@ -139,10 +147,79 @@ Otherwise, please use the custom values file for DOKS:
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
+  --namespace agnost --create-namespace \
   -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/doks-values.yaml
 ```
 
 > Please refer to [Digital Ocean Documentation](https://docs.digitalocean.com/products/kubernetes/how-to/create-clusters/) to learn more about DOKS cluster creation and maintenance.
+
+## Post Installation
+
+As a next step, you need to complete your setup by creating your user account through Agnost Studio.
+
+>To launch Agnost Studio, type the URL or IP address of your cluster on your browser (e.g., http(s)://<your cluster URL or IP>/studio).
+>
+>If you have installed Agnost locally you can access Agnost Studio at http://localhost/studio
+
+## Accessing Services
+
+If you need to access to the services running on Kubernetes, you need to run `kubectl port-forward` command.
+
+> [!WARNING]
+>
+> Below commands run on the `agnost` namespace, if you installed the chart to other namespace, then you should update `-n <NAMESPACE>`
+
+### MongoDB
+
+```bash
+# you can access to the database from `localhost:27017` after running this:
+kubectl port-forward mongodb-0 27017:27017 -n agnost
+
+# username:
+kubectl get secret mongodb -o jsonpath='{.data.username}' -n agnost | base64 -d
+
+# password:
+kubectl get secret mongodb -o jsonpath='{.data.password}' -n agnost | base64 -d
+```
+
+### Redis
+
+```bash
+# you can access to the database from `localhost:6379` after running this:
+kubectl port-forward svc/redis 6379:6379 -n agnost
+
+# password:
+kubectl get secret redis -o jsonpath='{.data.password}' -n agnost | base64 -d
+```
+
+### MinIO Console
+
+```bash
+# http://localhost:9001
+kubectl port-forward svc/minio-storage-console 9001:9001 -n agnost
+
+# username:
+kubectl get secret minio -o jsonpath='{.data.rootUser}' -n agnost | base64 -d
+
+# password:
+kubectl get secret minio -o jsonpath='{.data.rootPassword}' -n agnost | base64 -d
+```
+
+### Zot Registry
+
+```bash
+# http://localhost:5000
+kubectl port-forward svc/zot 5000:5000 -n agnost
+```
+
+### Tekton Pipelines
+
+```bash
+# http://localhost:9097/#/taskruns
+kubectl port-forward svc/tekton-dashboard -n tekton-pipelines 9097:909 -n agnost
+```
+
+More information can be found [here](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/)
 
 ## Values
 
