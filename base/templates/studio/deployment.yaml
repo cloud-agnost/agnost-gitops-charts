@@ -42,29 +42,13 @@ spec:
             value: {{ .Release.Namespace }}
           - name: RELEASE_NUMBER
             value: {{ .Chart.AppVersion }}
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 4000
-          failureThreshold: 5
-          initialDelaySeconds: 30
-          periodSeconds: 20
-          timeoutSeconds: 6
-        startupProbe:
-          httpGet:
-            path: /health
-            port: 4000
-          failureThreshold: 30
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          timeoutSeconds: 6
         resources:
         {{- if not .Release.IsUpgrade }}
           requests:
             memory: 128Mi
             cpu: 100m
           limits:
-            memory: 256Mi
+            memory: 512Mi
             cpu: 500m
         {{- else }}
           {{ (index $dply.spec.template.spec.containers 0).resources | toYaml | indent 10 | trim }}
