@@ -1,0 +1,33 @@
+{{ $ingress := (lookup "networking.k8s.io/v1" "Ingress" .Release.Namespace "studio") }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: studio
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    {{ if $ingress }}
+    {{ toYaml $ingress.metadata.annotations | nindent 4 }}
+    {{ else }}
+    nginx.ingress.kubernetes.io/proxy-body-size: 500m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: '6000'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '6000'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '6000'
+    nginx.ingress.kubernetes.io/proxy-next-upstream-timeout: '6000'
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    {{ end }}
+spec:
+  {{ if $ingress }}
+  {{ toYaml $ingress.spec | nindent 2 }}
+  {{ else }}
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /studio/(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: studio
+            port:
+               number: 4000
+  {{ end }}

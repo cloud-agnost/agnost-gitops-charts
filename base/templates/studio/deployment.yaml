@@ -1,12 +1,12 @@
-{{ $dply := (lookup "apps/v1" "Deployment" .Release.Namespace "sync") }}
+{{ $dply := (lookup "apps/v1" "Deployment" .Release.Namespace "studio") }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sync
+  name: studio
   namespace: {{ .Release.Namespace }}
   labels:
-    app: sync
+    app: studio
 spec:
   {{- if not .Release.IsUpgrade }}
   replicas: 1
@@ -15,7 +15,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app: sync
+      app: studio
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -24,45 +24,24 @@ spec:
   template:
     metadata:
       labels:
-        app: sync
+        app: studio
     spec:
       initContainers:
-      - name: wait-for-redis
-        image: redis:alpine
+      - name: wait-for-platform-core
+        image: curlimages/curl:8.1.1
         imagePullPolicy: IfNotPresent
-        args: [ 'sh', '-c', 'until redis-cli -h ${CACHE_HOSTNAME} -p 6379 -a ${CACHE_PWD} get hello; do echo "Sleeping a bit..."; sleep 3; done; echo "Redis is ready!";' ]
-        env:
-          - name: CACHE_HOSTNAME
-            valueFrom:
-              secretKeyRef:
-                  name: redis
-                  key: hostname
-          - name: CACHE_PWD
-            valueFrom:
-               secretKeyRef:
-                  name: redis
-                  key: password
+        args: [ 'sh', '-c', 'until [[ "$(curl -s http://platform.{{ .Release.Namespace }}.svc:4000/ping)" == *"Pong!" ]]; do echo "Sleeping a bit..."; sleep 3; done; echo "platform is ready!";' ]
       containers:
-      - name: sync
-        image: {{ .Values.sync.image }}:{{ .Values.sync.tag }}
+      - name: studio
+        image: {{ .Values.studio.image }}:{{ .Values.studio.tag }}
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 4000
+          - containerPort: 4000
         env:
-          - name: CACHE_HOSTNAME
-            valueFrom:
-              secretKeyRef:
-                  name: redis
-                  key: hostname
-          - name: CACHE_PWD
-            valueFrom:
-              secretKeyRef:
-                  name: redis
-                  key: password
           - name: NAMESPACE
             value: {{ .Release.Namespace }}
           - name: RELEASE_NUMBER
-            value: {{ .Values.sync.tag }}
+            value: {{ .Chart.AppVersion }}
         livenessProbe:
           httpGet:
             path: /health
