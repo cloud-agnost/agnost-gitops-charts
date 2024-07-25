@@ -7,6 +7,7 @@
 # This group name should be **unique**, hence using your own company's domain
 # here is recommended.
 groupName: agnost.dev
+solverName: agnost
 
 certManager:
   namespace: cert-manager

@@ -31,6 +31,10 @@ spec:
           env:
             - name: GROUP_NAME
               value: {{ .Values.groupName | quote }}
+            - name: SOLVER_NAME
+              value: {{ .Values.solverName | quote }}
+            - name: RELEASE_NUMBER
+              value: {{ .Values.image.tag }}
           ports:
             - name: https
               containerPort: 443
