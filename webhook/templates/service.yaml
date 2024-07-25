@@ -17,4 +17,4 @@ spec:
       name: https
   selector:
     app: {{ include "agnost-webhook.name" . }}
-    # release: {{ .Release.Name }}
+    release: {{ .Release.Name }}
