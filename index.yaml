@@ -2,8 +2,29 @@ apiVersion: v1
 entries:
   base:
   - apiVersion: v2
+    appVersion: v0.0.8
+    created: "2024-07-25T09:11:52.034274764Z"
+    dependencies:
+    - condition: ingress-nginx.enabled
+      name: ingress-nginx
+      repository: https://kubernetes.github.io/ingress-nginx
+      version: 4.10.1
+    - condition: cert-manager.enabled
+      name: cert-manager
+      repository: https://charts.jetstack.io
+      version: 1.14.5
+    - name: agnost-webhook
+      repository: file://../webhook
+      version: 1.0.0
+    description: Agnost GitOps Platform Installation
+    digest: 85fb63c66399cbbc7ca88aa2fde647696ddc06bea304ed2fed4f0521dbf0655b
+    name: base
+    urls:
+    - https://cloud-agnost.github.io/agnost-gitops-charts/base-0.0.13.tgz
+    version: 0.0.13
+  - apiVersion: v2
     appVersion: v0.0.7
-    created: "2024-07-25T07:20:50.498180685Z"
+    created: "2024-07-25T09:11:52.025064855Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -24,7 +45,7 @@ entries:
     version: 0.0.12
   - apiVersion: v2
     appVersion: v0.0.6
-    created: "2024-07-25T07:20:50.488672141Z"
+    created: "2024-07-25T09:11:52.015826969Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -45,7 +66,7 @@ entries:
     version: 0.0.11
   - apiVersion: v2
     appVersion: v0.0.5
-    created: "2024-07-25T07:20:50.478836188Z"
+    created: "2024-07-25T09:11:52.006442312Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -66,7 +87,7 @@ entries:
     version: 0.0.10
   - apiVersion: v2
     appVersion: v0.0.4
-    created: "2024-07-25T07:20:50.573179955Z"
+    created: "2024-07-25T09:11:52.10924744Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -87,7 +108,7 @@ entries:
     version: 0.0.9
   - apiVersion: v2
     appVersion: v0.0.4
-    created: "2024-07-25T07:20:50.563286796Z"
+    created: "2024-07-25T09:11:52.099149736Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -108,7 +129,7 @@ entries:
     version: 0.0.8
   - apiVersion: v2
     appVersion: v0.0.3
-    created: "2024-07-25T07:20:50.554910014Z"
+    created: "2024-07-25T09:11:52.08879093Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -129,7 +150,7 @@ entries:
     version: 0.0.7
   - apiVersion: v2
     appVersion: v0.0.2
-    created: "2024-07-25T07:20:50.545369959Z"
+    created: "2024-07-25T09:11:52.079470993Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -150,7 +171,7 @@ entries:
     version: 0.0.6
   - apiVersion: v2
     appVersion: v0.0.2
-    created: "2024-07-25T07:20:50.53625142Z"
+    created: "2024-07-25T09:11:52.070328279Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -171,7 +192,7 @@ entries:
     version: 0.0.5
   - apiVersion: v2
     appVersion: v0.0.2
-    created: "2024-07-25T07:20:50.527219462Z"
+    created: "2024-07-25T09:11:52.061352755Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -192,7 +213,7 @@ entries:
     version: 0.0.4
   - apiVersion: v2
     appVersion: v0.0.1
-    created: "2024-07-25T07:20:50.517991523Z"
+    created: "2024-07-25T09:11:52.052135149Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -213,7 +234,7 @@ entries:
     version: 0.0.3
   - apiVersion: v2
     appVersion: v0.0.1
-    created: "2024-07-25T07:20:50.508201646Z"
+    created: "2024-07-25T09:11:52.043587018Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -234,7 +255,7 @@ entries:
     version: 0.0.2
   - apiVersion: v2
     appVersion: v0.0.1
-    created: "2024-07-25T07:20:50.468467917Z"
+    created: "2024-07-25T09:11:51.997018007Z"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -253,4 +274,4 @@ entries:
     urls:
     - https://cloud-agnost.github.io/agnost-gitops-charts/base-0.0.1.tgz
     version: 0.0.1
-generated: "2024-07-25T07:20:50.458750679Z"
+generated: "2024-07-25T09:11:51.987430056Z"
