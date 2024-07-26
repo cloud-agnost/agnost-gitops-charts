@@ -50,19 +50,19 @@ agnost-webhook:
     # agnost-webhook image name
     repository: "europe-docker.pkg.dev/agnost-gitops/images/webhook"
     # agnost-webhook image tag
-    tag: "v0.0.5"
+    tag: "v0.0.6"
 
 platform:
   # platform image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/platform"
   # platform image tag
-  tag: "v0.0.6"
+  tag: "v0.0.7"
 
 sync:
   # sync image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/sync"
   # sync image tag
-  tag: "v0.0.3"
+  tag: "v0.0.4"
 
 monitor:
   # monitor image name
@@ -74,5 +74,5 @@ studio:
   # studio image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/studio"
   # studio image tag
-  tag: "v0.0.6"
+  tag: "v0.0.7"
 
