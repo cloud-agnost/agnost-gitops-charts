@@ -2,9 +2,19 @@
 
 [agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters
 
-![Version: 0.0.19](https://img.shields.io/badge/Version-0.0.19-informational?style=flat-square) ![AppVersion: v0.0.14](https://img.shields.io/badge/AppVersion-v0.0.14-informational?style=flat-square)
+![Version: 0.0.20](https://img.shields.io/badge/Version-0.0.20-informational?style=flat-square) ![AppVersion: v0.0.14](https://img.shields.io/badge/AppVersion-v0.0.14-informational?style=flat-square)
 
 This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+
+This chart will install following components together with Agnost software:
+
+- **MongoDB** to store agnost configuration
+- **Redis** to use as a cache
+- **MinIO** to store data on S3 compatible buckets
+- **Zot Registry** to store container images and other data in an OCI Registry
+- **Tekton Pipelines** as CI/CD pipeline to build, push, and deploy your applications.
+- **NGINX Ingress Controller** to use as Ingress controller. You can skip installing this if you already have `ingress-nginx` running in the cluster.
+- **Cert Manager** to generate TLS certificates for your domain. You can skip installing this if you already have `cert-manager` running in the cluster or you will not use any domain name for Agnost.
 
 ## Requirements
 
@@ -61,7 +71,7 @@ See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_h
 helm show values agnost-gitops/base
 ```
 
-## Minikube Installation
+### Minikube Installation
 
 Create a Minikube cluster with `ingress-nginx` addon enabled, and install the chart:
 
@@ -74,7 +84,7 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
 
 > Please refer to [Minikube Documentation](https://minikube.sigs.k8s.io/docs/start/) for more information.
 
-## GKE Installation (Google Kubernetes Engine)
+### GKE Installation (Google Kubernetes Engine)
 
 This chart installs `ingress-nginx` by default. If you already have it running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter:
 
@@ -93,7 +103,7 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
 
 > Please refer to [GCP documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters) to learn more about GKE cluster creation and maintenance.
 
-## EKS Installation (AWS Elastic Kubernetes Service)
+### EKS Installation (AWS Elastic Kubernetes Service)
 
 This chart installs `ingress-nginx` by default. If you already have it running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter:
 
@@ -113,7 +123,7 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
 
 > Please refer to [AWS Documentation](https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html) to learn more about EKS cluster creation and maintenance.
 
-## AKS Installation (Azure Kubernetes Service)
+### AKS Installation (Azure Kubernetes Service)
 
 This chart installs `ingress-nginx` by default. If you already have it running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter:
 
@@ -133,7 +143,7 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
 
 > Please refer to [Azure Documentation](https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-portal?tabs=azure-cli) to learn more about AKS cluster creation and maintenance.
 
-## DOKS Installation (Digital Ocean Kubernetes Service)
+### DOKS Installation (Digital Ocean Kubernetes Service)
 
 This chart installs `ingress-nginx` by default. If you already have it running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter:
 
@@ -188,8 +198,11 @@ kubectl get secret mongodb -o jsonpath='{.data.password}' -n agnost | base64 -d
 # you can access to the database from `localhost:6379` after running this:
 kubectl port-forward svc/redis 6379:6379 -n agnost
 
-# password:
-kubectl get secret redis -o jsonpath='{.data.password}' -n agnost | base64 -d
+# get password:
+export REDIS_PASS=$(kubectl get secret redis -o jsonpath='{.data.password}' -n agnost | base64 -d)
+
+# connect to redis:
+redis-cli -h localhost -p 6379 --pass ${REDIS_PASS}
 ```
 
 ### MinIO Console
@@ -199,10 +212,10 @@ kubectl get secret redis -o jsonpath='{.data.password}' -n agnost | base64 -d
 kubectl port-forward svc/minio-storage-console 9001:9001 -n agnost
 
 # username:
-kubectl get secret minio -o jsonpath='{.data.rootUser}' -n agnost | base64 -d
+kubectl get secret minio -o jsonpath='{.data.accessKey}' -n agnost | base64 -d
 
 # password:
-kubectl get secret minio -o jsonpath='{.data.rootPassword}' -n agnost | base64 -d
+kubectl get secret minio -o jsonpath='{.data.secretKey}' -n agnost | base64 -d
 ```
 
 ### Zot Registry
@@ -216,7 +229,7 @@ kubectl port-forward svc/zot 5000:5000 -n agnost
 
 ```bash
 # http://localhost:9097/#/taskruns
-kubectl port-forward svc/tekton-dashboard -n tekton-pipelines 9097:909 -n agnost
+kubectl port-forward svc/tekton-dashboard 9097:9097 -n tekton-pipelines
 ```
 
 More information can be found [here](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/)
