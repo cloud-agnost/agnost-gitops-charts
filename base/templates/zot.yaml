@@ -12,7 +12,30 @@ metadata:
   name: zot
   namespace: {{ .Release.Namespace }}
 data:
-  config.json: "{\n  \"storage\": {\n    \"rootDirectory\": \"/tmp/zot\",\n    \"dedupe\": false,\n    \"gc\": false,\n    \"storageDriver\": {\n        \"name\": \"s3\",\n        \"regionendpoint\": \"http://minio.{{ .Release.Namespace }}:9000\",\n        \"region\": \"us-east-1\",\n        \"bucket\": \"zot-storage\",\n        \"secure\": false,\n        \"skipverify\": false\n    }\n  },\n  \"http\": {\n    \"address\": \"0.0.0.0\",\n    \"port\": \"5000\",\n    \"realm\": \"zot\" },\n  \"log\": { \"level\": \"debug\" },\n  \"extensions\": {\n    \"search\": {\n      \"enable\": true\n    },\n    \"ui\": {\n      \"enable\": true\n    }\n  }\n}"
+  config.json: |-
+    {
+      "storage": {
+        "rootDirectory":"/data",
+        "commit": true,
+        "dedupe": true,
+        "gc": true,
+        "gcDelay": "1h",
+        "gcInterval": "24h"
+      },
+      "http": {
+        "address": "0.0.0.0",
+        "port": "5000",
+        "realm": "zot" },
+      "log": { "level": "debug" },
+      "extensions": {
+        "search": {
+          "enable": true
+        },
+        "ui": {
+          "enable": true
+        }
+      }
+    }
 
 ---
 
@@ -40,10 +63,6 @@ spec:
         app: zot
     spec:
       serviceAccountName: zot
-      initContainers:
-      - name: wait-for-minio
-        image: docker.io/curlimages/curl:8.6.0
-        command: ['sh', '-c', 'until curl -s http://minio.{{ .Release.Namespace }}:9000/minio/health/live; do echo waiting for minio; sleep 2; done']
       containers:
       - name: zot
         image:  ghcr.io/project-zot/zot-linux-amd64:v2.0.4
@@ -51,17 +70,6 @@ spec:
         ports:
         - containerPort: 5000
           name: zot
-        env:
-        - name: AWS_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              key: accessKey
-              name: minio
-        - name: AWS_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              key: secretKey
-              name: minio
         livenessProbe:
           httpGet:
             path: /v2/
@@ -89,11 +97,20 @@ spec:
         volumeMounts:
         - mountPath: '/etc/zot'
           name: config
+        - name: data
+          mountPath: /data
       volumes:
       - name: config
         configMap:
           name: zot
-
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 50Gi
 ---
 
 apiVersion: v1

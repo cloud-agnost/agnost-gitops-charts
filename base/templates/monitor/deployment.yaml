@@ -83,7 +83,7 @@ spec:
           - name: NAMESPACE
             value: {{ .Release.Namespace }}
           - name: RELEASE_NUMBER
-            value: {{ .Values.monitor.tag }}
+            value: {{ .Chart.AppVersion }}
         livenessProbe:
           httpGet:
             path: /health

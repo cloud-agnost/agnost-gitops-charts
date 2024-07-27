@@ -22,4 +22,4 @@ spec:
       name: memory
       target:
         type: AverageValue
-        averageValue: 100Mi
+        averageValue: 200Mi

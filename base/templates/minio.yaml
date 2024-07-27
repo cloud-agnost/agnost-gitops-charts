@@ -79,7 +79,7 @@ spec:
             memory: 256Mi
             cpu: 100m
           limits:
-            memory: 1Gi
+            memory: 2Gi
             cpu: 1
         {{- else }}
           {{ (index $sts.spec.template.spec.containers 0).resources | toYaml | indent 10 | trim }}
@@ -122,7 +122,7 @@ spec:
       resources:
         requests:
           {{- if not .Release.IsUpgrade }}
-          storage: 10Gi
+          storage: 1Gi
           {{- else }}
           storage: {{ (index $sts.spec.volumeClaimTemplates 0).spec.resources.requests.storage }}
           {{- end }}

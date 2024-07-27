@@ -41,7 +41,7 @@ spec:
           - name: NAMESPACE
             value: {{ .Release.Namespace }}
           - name: RELEASE_NUMBER
-            value: {{ .Values.studio.tag }}
+            value: {{ .Chart.AppVersion }}
         resources:
         {{- if not .Release.IsUpgrade }}
           requests:
