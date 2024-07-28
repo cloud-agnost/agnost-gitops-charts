@@ -34,7 +34,7 @@ spec:
             - name: SOLVER_NAME
               value: {{ .Values.solverName | quote }}
             - name: RELEASE_NUMBER
-              value: {{ .Chart.AppVersion }}
+              value: {{ .Chart.AppVersion | quote }}
           ports:
             - name: https
               containerPort: 443
