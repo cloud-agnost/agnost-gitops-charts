@@ -62,6 +62,7 @@ spec:
             echo "Waiting for MinIO to be ready..."
             sleep 3
           done
+          wait
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9000
