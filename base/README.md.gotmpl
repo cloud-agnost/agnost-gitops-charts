@@ -213,11 +213,26 @@ kubectl get secret minio -o jsonpath='{.data.accessKey}' -n agnost | base64 -d
 kubectl get secret minio -o jsonpath='{.data.secretKey}' -n agnost | base64 -d
 ```
 
-### Zot Registry
+### Docker Registry
 
 ```bash
-# http://localhost:5000
-kubectl port-forward svc/zot 5000:5000 -n agnost
+kubectl port-forward svc/registry 5000:5000 -n agnost
+
+curl -s http://localhost:5000/v2/_catalog | jq
+{
+  "repositories": [
+    "myimage1",
+    "myimage1-cache"
+  ]
+}
+
+curl -s http://localhost:5000/v2/myimage1/tags/list | jq
+{
+  "name": "myimage1",
+  "tags": [
+    "a2bb139"
+  ]
+}
 ```
 
 ### Tekton Pipelines

@@ -62,9 +62,6 @@ spec:
             echo "Waiting for MinIO to be ready..."
             sleep 3
           done
-          # If the bucket does not exist, create it
-          if ! mc ls myminio/zot-storage; then mc mb myminio/zot-storage; fi
-          wait
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9000
