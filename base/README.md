@@ -2,7 +2,7 @@
 
 [agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters
 
-![Version: 0.0.31](https://img.shields.io/badge/Version-0.0.31-informational?style=flat-square) ![AppVersion: v0.0.24](https://img.shields.io/badge/AppVersion-v0.0.24-informational?style=flat-square)
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: v0.0.24](https://img.shields.io/badge/AppVersion-v0.0.24-informational?style=flat-square)
 
 This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
@@ -218,11 +218,26 @@ kubectl get secret minio -o jsonpath='{.data.accessKey}' -n agnost | base64 -d
 kubectl get secret minio -o jsonpath='{.data.secretKey}' -n agnost | base64 -d
 ```
 
-### Zot Registry
+### Docker Registry
 
 ```bash
-# http://localhost:5000
-kubectl port-forward svc/zot 5000:5000 -n agnost
+kubectl port-forward svc/registry 5000:5000 -n agnost
+
+curl -s http://localhost:5000/v2/_catalog | jq
+{
+  "repositories": [
+    "myimage1",
+    "myimage1-cache"
+  ]
+}
+
+curl -s http://localhost:5000/v2/myimage1/tags/list | jq
+{
+  "name": "myimage1",
+  "tags": [
+    "a2bb139"
+  ]
+}
 ```
 
 ### Tekton Pipelines
