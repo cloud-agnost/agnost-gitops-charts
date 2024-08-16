@@ -1,5 +1,26 @@
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: registry
+  namespace: {{ .Release.Namespace }}
+data:
+  config.yml: |
+    version: 0.1
+    log:
+      fields:
+        service: registry
+    storage:
+      delete:
+        enabled: true
+      filesystem:
+        rootdirectory: /var/lib/registry
+    http:
+      addr: :5000
+      headers:
+        X-Content-Type-Options: [nosniff]
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: registry
@@ -72,6 +93,13 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /var/lib/registry
+        - name: config
+          mountPath: /etc/docker/registry/config.yml
+          subPath: config.yml
+      volumes:
+      - name: config
+        configMap:
+          name: registry
   volumeClaimTemplates:
   - metadata:
       name: data
@@ -80,3 +108,42 @@ spec:
       resources:
         requests:
           storage: 50Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: registry-gc
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "0 */6 * * *" # Runs every 6 hours
+  timezone: "Etc/UTC"  # Set the timezone for the cron schedule
+  concurrencyPolicy: Forbid  # Prevent concurrent jobs from running
+  suspend: false  # Set to true to suspend the cron job
+  successfulJobsHistoryLimit: 3  # Number of successful job history to keep
+  failedJobsHistoryLimit: 1  # Number of failed job history to keep
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: garbage-collect
+            image: registry:2.8.3
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/registry
+            - garbage-collect
+            - /etc/docker/registry/config.yml
+            volumeMounts:
+            - name: config
+              mountPath: /etc/docker/registry/config.yml
+              subPath: config.yml
+            - name: data
+              mountPath: /var/lib/registry
+          restartPolicy: Never
+          volumes:
+          - name: config
+            configMap:
+              name: registry
+          - name: data
+            persistentVolumeClaim:
+              claimName: data-registry-0
