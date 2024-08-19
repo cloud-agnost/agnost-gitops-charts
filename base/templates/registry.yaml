@@ -60,7 +60,7 @@ spec:
         app: registry
     spec:
       containers:
-      - name: docker-private-registry
+      - name: registry
         image: registry:2.8.3
         imagePullPolicy: IfNotPresent
         ports:
@@ -117,7 +117,7 @@ metadata:
 spec:
   schedule: "0 */6 * * *" # Runs every 6 hours
   timezone: "Etc/UTC"  # Set the timezone for the cron schedule
-  concurrencyPolicy: Forbid  # Prevent concurrent jobs from running
+  concurrencyPolicy: Replace  # Terminate the currently running job and replace it with a new job when the next scheduled time arrives
   suspend: false  # Set to true to suspend the cron job
   successfulJobsHistoryLimit: 3  # Number of successful job history to keep
   failedJobsHistoryLimit: 1  # Number of failed job history to keep
