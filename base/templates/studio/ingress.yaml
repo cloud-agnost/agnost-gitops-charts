@@ -13,6 +13,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-send-timeout: '6000'
     nginx.ingress.kubernetes.io/proxy-read-timeout: '6000'
     nginx.ingress.kubernetes.io/proxy-next-upstream-timeout: '6000'
+    nginx.ingress.kubernetes.io/rewrite-target: /studio$1$2
     {{ end }}
 spec:
   {{ if $ingress }}
@@ -29,4 +30,11 @@ spec:
             name: studio
             port:
                number: 4000
+      - backend:
+          service:
+            name: studio
+            port:
+              number: 4000
+        path: /
+        pathType: ImplementationSpecific
   {{ end }}
