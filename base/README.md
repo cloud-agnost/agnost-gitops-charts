@@ -1,20 +1,20 @@
 # agnost-gitops base helm chart
 
-[agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters
+[agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters. It provides a complete CD solution for building, deploying, and managing applications. In short, you connect your [GitHub](https://github.com), [GitLab](https://gitlab.com) or [Bitbucket](https://bitbucket.com) repository and Agnost takes care of building and deploying your app to your Kubernetes cluster when you push new code.
 
-![Version: 0.1.10](https://img.shields.io/badge/Version-0.1.10-informational?style=flat-square) ![AppVersion: v0.0.33](https://img.shields.io/badge/AppVersion-v0.0.33-informational?style=flat-square)
+![Version: 0.1.11](https://img.shields.io/badge/Version-0.1.11-informational?style=flat-square) ![AppVersion: v0.0.33](https://img.shields.io/badge/AppVersion-v0.0.33-informational?style=flat-square)
 
 This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 This chart will install following components together with Agnost software:
 
-- **MongoDB** to store agnost configuration
-- **Redis** to use as a cache
+- **MongoDB** to store Agnost configuration, your container definitions and git repository settings
+- **Redis** to use as a cache to speed up data retrieval and authentication
 - **MinIO** to store data on S3 compatible buckets
-- **Zot Registry** to store container images and other data in an OCI Registry
-- **Tekton Pipelines** as CI/CD pipeline to build, push, and deploy your applications.
-- **NGINX Ingress Controller** to use as Ingress controller. You can skip installing this if you already have `ingress-nginx` running in the cluster.
-- **Cert Manager** to generate TLS certificates for your domain. You can skip installing this if you already have `cert-manager` running in the cluster or you will not use any domain name for Agnost.
+- **Registry** to store container images and other data in an OCI Registry
+- **Tekton Pipelines** as CD pipeline to build, push, and deploy your applications.
+- **NGINX Ingress Controller** to use as Ingress controller. You can skip installing this if you already have `ingress-nginx` running in the cluster. However, you need to specify the existing ingress controller installation namespace in helm values.yaml file under "ingress-nginx" and "namespaceOverride".
+- **Cert Manager** to generate TLS certificates for your domain. You can skip installing this if you already have `cert-manager` running in the cluster or you will not use any domain name for Agnost. However, you need to specify the existing cert-manager installation namespace in helm values.yaml file under "cert-manager" and "namespace".
 
 ## Requirements
 
@@ -24,7 +24,11 @@ This chart will install following components together with Agnost software:
 | https://charts.jetstack.io | cert-manager | 1.14.5 |
 | https://kubernetes.github.io/ingress-nginx | ingress-nginx | 4.10.1 |
 
-## Get Repo Info
+## Requirements
+To install and run Agnost on your Kubernetes cluster, you need and up an running Kubernetes cluster. We highly recommend at least 4CPUs and 8GB of memory for the cluster. As you add more containers and connect your repositories, you may need more resources to build, deploy and run your applications.
+
+## Get Agnost Chart
+The first step is to add the Agnost Helm repository to your local Helm client. You can do this by running the following command:
 
 ```console
 helm repo add agnost-gitops https://cloud-agnost.github.io/agnost-gitops-charts/
@@ -32,6 +36,7 @@ helm repo update
 ```
 
 ## Install Chart
+The next step is to install the Agnost chart on your Kubernetes cluster. You can do this by running the following command.
 
 **Important:** only helm3 is supported
 
@@ -45,9 +50,22 @@ _See [configuration](#configuration) below._
 
 _See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation._
 
-## Uninstall Chart
+## Setting up Agnost
+You can check the status of the installtion by running the following command. If all the pods are running, you can proceed to setting up the Agnost. It may take 5-10 minutes for all the pods to be up and running.
 
 ```console
+kubectl get pods -n agnost
+```
+
+Please note that if you have installed agnost to a different namespace, you need to replace `agnost` with your namespace.
+
+Following installation, you need to complete your setup by creating your user account through Agnost Studio. To launch Agnost Studio, type the URL or IP address of your cluster on your browser (e.g., http(s)://<your cluster URL or IP>/studio). If you have installed Agnost locally you can access Agnost Studio at http://localhost/studio
+
+Follow the set up steps to create your user account and connect your repositories. Please note that besides the owner of the Agnost cluster, other users cannot create their own accounts. The owner of the Agnost cluster needs to specifically create invitation links for other users to join the cluster.
+
+## Uninstall Chart
+
+```bash
 helm uninstall [RELEASE_NAME]
 ```
 
@@ -57,7 +75,7 @@ _See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command doc
 
 ## Upgrading Chart
 
-```console
+```bash
 helm upgrade [RELEASE_NAME] [CHART] --install
 ```
 
@@ -67,7 +85,7 @@ _See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documen
 
 See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](https://github.com/cloud-agnost/agnost-gitops-charts/blob/main/base/values.yaml), or run these configuration commands:
 
-```console
+```bash
 helm show values agnost-gitops/base
 ```
 
@@ -86,26 +104,14 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
 
 ### GKE Installation (Google Kubernetes Engine)
 
-This chart installs `ingress-nginx` by default. If you already have it running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter:
-
-```bash
-helm upgrade --install agnost-gitops agnost-gitops/base \
-  --namespace agnost --create-namespace \
-  --set ingress-nginx.enabled=false
-```
-
-Otherwise, install it with default options:
+This chart installs `ingress-nginx` by default.
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
   --namespace agnost --create-namespace
 ```
 
-> Please refer to [GCP documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters) to learn more about GKE cluster creation and maintenance.
-
-### EKS Installation (AWS Elastic Kubernetes Service)
-
-This chart installs `ingress-nginx` by default. If you already have it running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter:
+ If you already have `ingress-nginx` running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter. Please note that you need to specify the existing ingress controller installation namespace in helm values.yaml file under "ingress-nginx" and "namespaceOverride".
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
@@ -113,7 +119,11 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
   --set ingress-nginx.enabled=false
 ```
 
-Otherwise, please use the custom values file for EKS:
+> Please refer to [GCP documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters) to learn more about GKE cluster creation and maintenance.
+
+### EKS Installation (AWS Elastic Kubernetes Service)
+
+This chart installs `ingress-nginx` by default.
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
@@ -121,11 +131,7 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
   -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/eks-values.yaml
 ```
 
-> Please refer to [AWS Documentation](https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html) to learn more about EKS cluster creation and maintenance.
-
-### AKS Installation (Azure Kubernetes Service)
-
-This chart installs `ingress-nginx` by default. If you already have it running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter:
+If you already have `ingress-nginx` running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter. Please note that you need to specify the existing ingress controller installation namespace in helm values.yaml file under "ingress-nginx" and "namespaceOverride".
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
@@ -133,7 +139,11 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
   --set ingress-nginx.enabled=false
 ```
 
-Otherwise, please use the custom values file for AKS:
+> Please refer to [AWS Documentation](https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html) to learn more about EKS cluster creation and maintenance.
+
+### AKS Installation (Azure Kubernetes Service)
+
+This chart installs `ingress-nginx` by default.
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
@@ -141,11 +151,7 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
   -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/aks-values.yaml
 ```
 
-> Please refer to [Azure Documentation](https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-portal?tabs=azure-cli) to learn more about AKS cluster creation and maintenance.
-
-### DOKS Installation (Digital Ocean Kubernetes Service)
-
-This chart installs `ingress-nginx` by default. If you already have it running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter:
+If you already have `ingress-nginx` running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter. Please note that you need to specify the existing ingress controller installation namespace in helm values.yaml file under "ingress-nginx" and "namespaceOverride".
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
@@ -153,12 +159,24 @@ helm upgrade --install agnost-gitops agnost-gitops/base \
   --set ingress-nginx.enabled=false
 ```
 
-Otherwise, please use the custom values file for DOKS:
+> Please refer to [Azure Documentation](https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-portal?tabs=azure-cli) to learn more about AKS cluster creation and maintenance.
+
+### DOKS Installation (Digital Ocean Kubernetes Service)
+
+This chart installs `ingress-nginx` by default.
 
 ```bash
 helm upgrade --install agnost-gitops agnost-gitops/base \
   --namespace agnost --create-namespace \
   -f https://raw.githubusercontent.com/cloud-agnost/agnost-gitops-charts/main/custom-values/doks-values.yaml
+```
+
+If you already have `ingress-nginx` running on your cluster, you can add `--set ingress-nginx.enabled=false` parameter. Please note that you need to specify the existing ingress controller installation namespace in helm values.yaml file under "ingress-nginx" and "namespaceOverride".
+
+```bash
+helm upgrade --install agnost-gitops agnost-gitops/base \
+  --namespace agnost --create-namespace \
+  --set ingress-nginx.enabled=false
 ```
 
 > Please refer to [Digital Ocean Documentation](https://docs.digitalocean.com/products/kubernetes/how-to/create-clusters/) to learn more about DOKS cluster creation and maintenance.
@@ -195,7 +213,7 @@ kubectl get secret mongodb -o jsonpath='{.data.password}' -n agnost | base64 -d
 ### Redis
 
 ```bash
-# you can access to the database from `localhost:6379` after running this:
+# you can access to the Redis cache from `localhost:6379` after running this:
 kubectl port-forward svc/redis 6379:6379 -n agnost
 
 # get password:
@@ -209,7 +227,7 @@ redis-cli -h localhost -p 6379 --pass ${REDIS_PASS}
 
 ```bash
 # http://localhost:9001
-kubectl port-forward svc/minio-storage-console 9001:9001 -n agnost
+kubectl port-forward svc/minio-console 9001:9001 -n agnost
 
 # username:
 kubectl get secret minio -o jsonpath='{.data.accessKey}' -n agnost | base64 -d
