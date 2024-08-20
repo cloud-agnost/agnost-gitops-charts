@@ -2,7 +2,7 @@
 
 [agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters. It provides a complete CD solution for building, deploying, and managing applications. In short, you connect your [GitHub](https://github.com), [GitLab](https://gitlab.com) or [Bitbucket](https://bitbucket.com) repository and Agnost takes care of building and deploying your app to your Kubernetes cluster when you push new code.
 
-![Version: 0.1.11](https://img.shields.io/badge/Version-0.1.11-informational?style=flat-square) ![AppVersion: v0.0.33](https://img.shields.io/badge/AppVersion-v0.0.33-informational?style=flat-square)
+![Version: 0.1.12](https://img.shields.io/badge/Version-0.1.12-informational?style=flat-square) ![AppVersion: v0.0.33](https://img.shields.io/badge/AppVersion-v0.0.33-informational?style=flat-square)
 
 This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
@@ -24,7 +24,6 @@ This chart will install following components together with Agnost software:
 | https://charts.jetstack.io | cert-manager | 1.14.5 |
 | https://kubernetes.github.io/ingress-nginx | ingress-nginx | 4.10.1 |
 
-## Requirements
 To install and run Agnost on your Kubernetes cluster, you need and up an running Kubernetes cluster. We highly recommend at least 4CPUs and 8GB of memory for the cluster. As you add more containers and connect your repositories, you may need more resources to build, deploy and run your applications.
 
 ## Get Agnost Chart
@@ -41,7 +40,8 @@ The next step is to install the Agnost chart on your Kubernetes cluster. You can
 **Important:** only helm3 is supported
 
 ```console
-helm install [RELEASE_NAME] agnost-gitops/base
+helm upgrade --install [RELEASE_NAME] agnost-gitops/base \
+  --namespace agnost --create-namespace
 ```
 
 The command deploys agnost-gitops on the Kubernetes cluster in the default configuration.
@@ -61,7 +61,7 @@ Please note that if you have installed agnost to a different namespace, you need
 
 Following installation, you need to complete your setup by creating your user account through Agnost Studio. To launch Agnost Studio, type the URL or IP address of your cluster on your browser (e.g., http(s)://<your cluster URL or IP>/studio). If you have installed Agnost locally you can access Agnost Studio at http://localhost/studio
 
-Follow the set up steps to create your user account and connect your repositories. Please note that besides the owner of the Agnost cluster, other users cannot create their own accounts. The owner of the Agnost cluster needs to specifically create invitation links for other users to join the cluster.
+Please note that besides the owner of the Agnost cluster, other users cannot create their own accounts. The owner of the Agnost cluster needs to specifically create invitation links for other users to join the cluster through Agnost Studio.
 
 ## Uninstall Chart
 
