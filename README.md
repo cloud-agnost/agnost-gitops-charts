@@ -4,7 +4,7 @@
 
 Please refer to Agnost [documentation](https://agnost.dev/getting-started) on how to customize and use the platform.
 
-![Version: 0.1.12](https://img.shields.io/badge/Version-0.1.12-informational?style=flat-square) ![AppVersion: v0.0.33](https://img.shields.io/badge/AppVersion-v0.0.33-informational?style=flat-square)
+![Version: 0.1.13](https://img.shields.io/badge/Version-0.1.13-informational?style=flat-square) ![AppVersion: v0.0.34](https://img.shields.io/badge/AppVersion-v0.0.34-informational?style=flat-square)
 
 This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
