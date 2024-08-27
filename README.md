@@ -2,7 +2,7 @@
 
 [agnost-gitops](https://github.com/cloud-agnost/agnost-gitops) is an open source GitOps platform running on Kubernetes clusters. It provides a complete CD solution for building, deploying, and managing applications. In short, you connect your [GitHub](https://github.com), [GitLab](https://gitlab.com) or [Bitbucket](https://bitbucket.com) repository and Agnost takes care of building and deploying your app to your Kubernetes cluster when you push new code.
 
-![Version: 0.1.13](https://img.shields.io/badge/Version-0.1.13-informational?style=flat-square) ![AppVersion: v0.0.34](https://img.shields.io/badge/AppVersion-v0.0.34-informational?style=flat-square)
+![Version: 0.1.14](https://img.shields.io/badge/Version-0.1.14-informational?style=flat-square) ![AppVersion: v0.0.35](https://img.shields.io/badge/AppVersion-v0.0.35-informational?style=flat-square)
 
 This chart bootstraps an agnost-gitops deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
@@ -13,8 +13,8 @@ This chart will install following components together with Agnost software:
 - **MinIO** to store data on S3 compatible buckets
 - **Registry** to store container images and other data in an OCI Registry
 - **Tekton Pipelines** as CD pipeline to build, push, and deploy your applications.
-- **NGINX Ingress Controller** to use as Ingress controller. You can skip installing this if you already have `ingress-nginx` running in the cluster. However, you need to specify the existing ingress controller installation namespace in helm values.yaml file under "ingress-nginx" and "namespaceOverride".
-- **Cert Manager** to generate TLS certificates for your domain. You can skip installing this if you already have `cert-manager` running in the cluster or you will not use any domain name for Agnost. However, you need to specify the existing cert-manager installation namespace in helm values.yaml file under "cert-manager" and "namespace".
+- **NGINX Ingress Controller** to use as Ingress controller. You can skip installing this if you already have `ingress-nginx` running in the cluster. However, you need to specify the existing ingress controller installation namespace in helm values.yaml file. See [NGINX Ingress Controller troubleshooting](#ingress-nginx) section for more details.
+- **Cert Manager** to generate TLS certificates for your domain. You can skip installing this if you already have `cert-manager` running in the cluster. However, you need to overwrite several default values in values.yaml file. See [Cert Manager troubleshooting](#cert-manager) section for more details.
 
 ## Requirements
 
@@ -25,6 +25,8 @@ This chart will install following components together with Agnost software:
 | https://kubernetes.github.io/ingress-nginx | ingress-nginx | 4.10.1 |
 
 To install and run Agnost on your Kubernetes cluster, you need and up an running Kubernetes cluster. We highly recommend at least 4CPUs and 8GB of memory for the cluster. As you add more containers and connect your repositories, you may need more resources to build, deploy and run your applications.
+
+Please make sure that you have also installed [Helm](https://helm.sh/docs/intro/install/) and [kubectl](https://kubernetes.io/docs/tasks/tools/) command line tool.
 
 ## Get Agnost Chart
 The first step is to add the Agnost Helm repository to your local Helm client. You can do this by running the following command:
@@ -266,6 +268,27 @@ kubectl port-forward svc/tekton-dashboard 9097:9097 -n tekton-pipelines
 ```
 
 More information can be found [here](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/)
+
+## Troubleshooting
+We recommend installing Nginx Ingress Controller and Cert Manager using the default values of Agnost helm chart. However, if your Kubernetes cluster has already have any one of these components installed then you need to set couple of parameters in your installation command.
+
+### ingress-nginx
+If Nginx Ingress Controller has already been installed in your Kubernetes cluster. Please make sure you set the following values in your helm values.yaml file.
+
+| Key | Value |
+|-----|-------|
+| ingress-nginx.enabled | Set this value to `false` to that Agnost helm chart does not try to install nginx-ingress controller |
+| ingress-nginx.namespaceOverride | Set this value to the namespace where you have installed the nginx-ingress  |
+
+### cert-manager
+If Cert Manager has already been installed in your Kubernetes cluster. Please make sure you set the following values in your helm values.yaml file.
+
+| Key | Value |
+|-----|-------|
+| cert-manager.enabled | Set this value to `false` to that Agnost helm chart does not try to install cert-manager |
+| cert-manager.namespace | Set this value to the namespace where you have installed the cert-manager  |
+| agnost-webhook.certManager.namespace | Set this value to the namespace where you have installed the cert-manager  |
+| agnost-webhook.certManager.serviceAccountName | Set this value to the service account name of the cert-manager  |
 
 ## Values
 
