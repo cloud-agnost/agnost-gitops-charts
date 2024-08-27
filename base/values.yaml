@@ -56,7 +56,7 @@ platform:
   # platform image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/platform"
   # platform image tag
-  tag: "v0.0.27"
+  tag: "v0.0.28"
 
 sync:
   # sync image name
@@ -68,7 +68,7 @@ monitor:
   # monitor image name
   image: "europe-docker.pkg.dev/agnost-gitops/images/monitor"
   # monitor image tag
-  tag: "v0.0.7"
+  tag: "v0.0.8"
 
 studio:
   # studio image name
