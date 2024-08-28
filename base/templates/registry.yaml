@@ -107,7 +107,7 @@ spec:
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
-          storage: 50Gi
+          storage: 100Gi
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -125,6 +125,13 @@ spec:
     spec:
       template:
         spec:
+          affinity: # Ensures the garbage-collect pod runs on the same node as the StatefulSet. This ensures that the PVC is only attached to one node at a time.
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchLabels:
+                    app: registry  # Label that matches the StatefulSet pod
+                topologyKey: "kubernetes.io/hostname"  # Ensures the pod runs on the same node as the StatefulSet
           containers:
           - name: garbage-collect
             image: registry:2.8.3
